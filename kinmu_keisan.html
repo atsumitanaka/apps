@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>勤務時間計算ツール</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Yu Gothic UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { font-size: 1.4rem; color: #1a1a2e; margin-bottom: 6px; }
+    .subtitle { font-size: 0.82rem; color: #aaa; margin-bottom: 20px; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .field-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #555;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .dropzone {
+      border: 2px dashed #c0c8ff;
+      border-radius: 10px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: #f7f8ff;
+      transition: all 0.2s;
+    }
+    .dropzone:hover, .dropzone.dragover { border-color: #5b6af0; background: #eef0ff; }
+    .dropzone-icon { font-size: 2rem; margin-bottom: 8px; }
+    .dropzone-text { color: #888; font-size: 0.9rem; line-height: 1.7; }
+    .loaded-file {
+      display: none;
+      padding: 12px 16px;
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      color: #15803d;
+      font-weight: 600;
+    }
+    .change-btn {
+      display: none;
+      margin-top: 10px;
+      background: none;
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      color: #666;
+    }
+    .change-btn:hover { border-color: #aaa; }
+
+    /* 追記事項 */
+    select, input[type="date"], input[type="text"] {
+      padding: 9px 12px;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      background: white;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+    select:focus, input[type="date"]:focus, input[type="text"]:focus { border-color: #5b6af0; }
+
+    .adj-add-row {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px;
+    }
+    .adj-add-row input[type="date"] { flex: 0 0 140px; }
+    .adj-add-row select { flex: 1 1 180px; min-width: 140px; }
+    .adj-add-row .hour-input { flex: 0 0 80px; }
+    .adj-add-row .add-btn {
+      padding: 9px 16px; background: #5b6af0; color: white;
+      border: none; border-radius: 8px; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap;
+    }
+    .adj-add-row .add-btn:hover { background: #4a58d8; }
+
+    .adj-list { display: flex; flex-direction: column; gap: 6px; }
+    .adj-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; background: #f7f8ff; border-radius: 8px; font-size: 0.85rem;
+    }
+    .adj-item .adj-date { color: #555; font-weight: 600; min-width: 80px; }
+    .adj-item .adj-type { color: #444; flex: 1; }
+    .adj-item .adj-time { color: #16a34a; font-weight: 700; min-width: 48px; text-align: right; }
+    .adj-item .adj-remove { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1rem; padding: 0 2px; }
+    .adj-item .adj-remove:hover { color: #ef4444; }
+    .adj-total { margin-top: 10px; padding: 8px 12px; background: #f0fdf4; border-radius: 8px; font-size: 0.85rem; color: #15803d; font-weight: 700; display: none; }
+    .adj-empty { font-size: 0.82rem; color: #ccc; text-align: center; padding: 10px 0; }
+
+    .status-card {
+      padding: 12px 20px; display: flex; align-items: center; gap: 10px;
+      font-size: 0.88rem; color: #666; min-height: 48px;
+    }
+
+    .btn {
+      width: 100%; padding: 15px; background: #5b6af0; color: white;
+      border: none; border-radius: 10px; font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: background 0.2s; letter-spacing: 0.03em;
+    }
+    .btn:hover { background: #4a58d8; }
+    .btn:disabled { background: #b0b8e8; cursor: not-allowed; }
+
+    /* 結果 */
+    #results { display: none; margin-top: 6px; }
+    .results-date { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #999; margin-bottom: 14px; }
+
+    .calc-steps {
+      display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap;
+    }
+    .calc-item {
+      flex: 1; min-width: 110px;
+      background: #f7f8ff; border-radius: 10px;
+      padding: 14px 10px; text-align: center;
+    }
+    .calc-label { font-size: 0.72rem; font-weight: 700; color: #888; margin-bottom: 6px; line-height: 1.4; }
+    .calc-value { font-size: 1.35rem; font-weight: 800; color: #1a1a2e; font-variant-numeric: tabular-nums; }
+    .calc-value.large { font-size: 1.55rem; }
+    .calc-sub { font-size: 0.68rem; color: #aaa; margin-top: 4px; }
+    .calc-desc { font-size: 0.68rem; color: #bbb; margin-top: 4px; }
+    .calc-arrow { font-size: 0.78rem; color: #ccc; font-weight: 600; display: flex; align-items: center; flex-shrink: 0; }
+    .diff-item.diff-positive { background: #f0fdf4; }
+    .diff-item.diff-positive .calc-label { color: #4ade80; }
+    .diff-item.diff-positive .calc-value { color: #16a34a; }
+    .diff-item.diff-negative { background: #fef2f2; }
+    .diff-item.diff-negative .calc-label { color: #f87171; }
+    .diff-item.diff-negative .calc-value { color: #dc2626; }
+
+    .divider { height: 1px; background: #f0f0f0; margin: 14px 0; }
+
+    .sub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .sub-metric { text-align: center; padding: 10px 6px; }
+    .sub-label { font-size: 0.72rem; color: #aaa; margin-bottom: 4px; line-height: 1.4; }
+    .sub-value { font-size: 1.05rem; font-weight: 700; color: #444; }
+
+    .detail-toggle { background: none; border: none; color: #5b6af0; font-size: 0.85rem; cursor: pointer; padding: 0; margin-top: 4px; }
+    .detail-table-wrap { margin-top: 12px; overflow-x: auto; display: none; }
+    .detail-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .detail-table th { text-align: left; padding: 7px 10px; background: #f5f5f5; color: #777; font-weight: 700; font-size: 0.76rem; }
+    .detail-table td { padding: 6px 10px; border-bottom: 1px solid #f5f5f5; color: #444; }
+    .detail-table tr:last-child td { border-bottom: none; }
+    .detail-table .adj-row td { background: #f0fdf4; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.73rem; font-weight: 700; }
+    .tag-working { background: #dbeafe; color: #1d4ed8; }
+    .tag-adj { background: #dcfce7; color: #15803d; }
+
+    .error-box { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px 14px; color: #dc2626; font-size: 0.88rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>勤務時間計算ツール</h1>
+  <p class="subtitle">CSVファイルから直接計算 — AI・API不要・完全無料</p>
+
+  <!-- CSV アップロード -->
+  <div class="card">
+    <label class="field-label">勤務CSVファイル（SRKINMUCSV）</label>
+    <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <div class="dropzone-icon">📂</div>
+      <p class="dropzone-text">CSVファイルをドラッグ＆ドロップ<br>またはクリックして選択</p>
+    </div>
+    <input type="file" id="fileInput" accept=".csv,.CSV" style="display:none" />
+    <div class="loaded-file" id="loadedFile"></div>
+    <button class="change-btn" id="changeBtn" onclick="resetFile()">ファイルを変更</button>
+  </div>
+
+  <!-- 追記事項 -->
+  <div class="card">
+    <label class="field-label">追記事項（未承認の休暇など）</label>
+    <div class="adj-add-row">
+      <input type="date" id="adjDate" />
+      <select id="adjType" onchange="onAdjTypeChange()">
+        <option value="full">年休（全日）　+7:45</option>
+        <option value="am">午前半休　+3:52</option>
+        <option value="pm">午後半休　+3:53</option>
+        <option value="hour">時間休（時間指定）</option>
+      </select>
+      <input type="text" id="adjHourInput" class="hour-input" placeholder="例: 1:30" style="display:none" />
+      <button class="add-btn" onclick="addAdjustment()">＋追加</button>
+    </div>
+    <div class="adj-list" id="adjList">
+      <div class="adj-empty">追記事項なし</div>
+    </div>
+    <div class="adj-total" id="adjTotal"></div>
+  </div>
+
+  <!-- ステータス -->
+  <div class="card status-card" id="statusCard">
+    <span>CSVファイルをドラッグ＆ドロップしてください</span>
+  </div>
+
+  <button class="btn" id="calcBtn" onclick="calculate()" disabled>計算する</button>
+
+  <!-- 結果 -->
+  <div id="results">
+    <div class="card" style="margin-top:14px;">
+      <p class="results-date" id="resultsDateLabel"></p>
+
+      <div class="calc-steps">
+        <div class="calc-item">
+          <div class="calc-label">① 実労働時間</div>
+          <div class="calc-value" id="mActual">--:--</div>
+          <div class="calc-sub" id="mActualSub"></div>
+          <div class="calc-desc">勤務時間列の合計</div>
+        </div>
+        <div class="calc-arrow">−</div>
+        <div class="calc-item">
+          <div class="calc-label">③ 必要勤務時間</div>
+          <div class="calc-value" id="mRequired">--:--</div>
+          <div class="calc-desc">② 勤務日数 <span id="mWorkDays">--</span>日 × 7:45</div>
+        </div>
+        <div class="calc-arrow">=</div>
+        <div class="calc-item diff-item" id="mDiffCard">
+          <div class="calc-label" id="mDiffLabel">過不足</div>
+          <div class="calc-value large" id="mDiff">--:--</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="sub-grid">
+        <div class="sub-metric">
+          <div class="sub-label">月間必要<br>勤務時間</div>
+          <div class="sub-value" id="mMonthTotal">--:--</div>
+        </div>
+        <div class="sub-metric">
+          <div class="sub-label">月間稼働日数</div>
+          <div class="sub-value" id="mMonthDays">-- 日</div>
+        </div>
+        <div class="sub-metric">
+          <div class="sub-label">残り必要<br>勤務時間</div>
+          <div class="sub-value" id="mRemaining">--:--</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="detail-toggle" id="detailToggle" onclick="toggleDetail()">▶ 日別詳細を表示</button>
+      <div class="detail-table-wrap" id="detailWrap">
+        <table class="detail-table">
+          <thead><tr><th>日付</th><th>種別</th><th>勤務時間</th></tr></thead>
+          <tbody id="detailBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STANDARD_MIN = 7 * 60 + 45;
+  const DOW = ['日','月','火','水','木','金','土'];
+
+  let csvData = null;
+  let detailOpen = false;
+  let adjustments = [];
+
+  // ---- CSV パース（Shift-JIS対応）----
+  function parseCSVLine(line) {
+    const result = [];
+    let i = 0;
+    while (i < line.length) {
+      if (line[i] === '"') {
+        let val = '';
+        i++;
+        while (i < line.length) {
+          if (line[i] === '"' && line[i+1] === '"') { val += '"'; i += 2; }
+          else if (line[i] === '"') { i++; break; }
+          else { val += line[i++]; }
+        }
+        result.push(val);
+        if (line[i] === ',') i++;
+      } else {
+        let val = '';
+        while (i < line.length && line[i] !== ',') val += line[i++];
+        result.push(val);
+        if (line[i] === ',') i++;
+      }
+    }
+    return result;
+  }
+
+  function loadCSV(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const decoder = new TextDecoder('shift-jis');
+        const text = decoder.decode(e.target.result);
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        csvData = lines.map(parseCSVLine);
+
+        document.getElementById('dropzone').style.display = 'none';
+        const loaded = document.getElementById('loadedFile');
+        loaded.textContent = `✓ ${file.name}`;
+        loaded.style.display = 'block';
+        document.getElementById('changeBtn').style.display = 'inline-block';
+        document.getElementById('calcBtn').disabled = false;
+        setStatus(`${file.name} を読み込みました。「計算する」を押してください`);
+      } catch(e) {
+        setStatus('CSVの読み込みに失敗しました: ' + e.message, true);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function resetFile() {
+    csvData = null;
+    document.getElementById('loadedFile').style.display = 'none';
+    document.getElementById('dropzone').style.display = 'block';
+    document.getElementById('changeBtn').style.display = 'none';
+    document.getElementById('fileInput').value = '';
+    document.getElementById('calcBtn').disabled = true;
+    document.getElementById('results').style.display = 'none';
+    setStatus('CSVファイルをドラッグ＆ドロップしてください');
+  }
+
+  // ドラッグ＆ドロップ
+  const dropzone = document.getElementById('dropzone');
+  dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+  dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+  dropzone.addEventListener('drop', e => {
+    e.preventDefault(); dropzone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) loadCSV(e.dataTransfer.files[0]);
+  });
+  document.getElementById('fileInput').addEventListener('change', e => {
+    if (e.target.files[0]) loadCSV(e.target.files[0]);
+  });
+
+  // ---- 追記事項 ----
+  const ADJ_TYPES = {
+    full: { label: '年休（全日）', minutes: 465 },
+    am:   { label: '午前半休',    minutes: 232 },
+    pm:   { label: '午後半休',    minutes: 233 },
+    hour: { label: '時間休',      minutes: null },
+  };
+
+  function onAdjTypeChange() {
+    document.getElementById('adjHourInput').style.display =
+      document.getElementById('adjType').value === 'hour' ? 'block' : 'none';
+  }
+
+  function addAdjustment() {
+    const dateVal = document.getElementById('adjDate').value;
+    const type    = document.getElementById('adjType').value;
+    const hourStr = document.getElementById('adjHourInput').value.trim();
+    if (!dateVal) { alert('日付を入力してください'); return; }
+    let minutes;
+    if (type === 'hour') {
+      const m = hourStr.match(/^(\d+):(\d+)$/);
+      if (!m) { alert('時間を「時間:分」形式で入力してください（例: 1:30）'); return; }
+      minutes = parseInt(m[1]) * 60 + parseInt(m[2]);
+      if (minutes <= 0) { alert('0より大きい時間を入力してください'); return; }
+    } else {
+      minutes = ADJ_TYPES[type].minutes;
+    }
+    const label = type === 'hour' ? `時間休 ${hourStr}` : ADJ_TYPES[type].label;
+    adjustments.push({ id: Date.now(), date: dateVal, minutes, label });
+    renderAdjList();
+    if (csvData) calculate();
+  }
+
+  function removeAdjustment(id) {
+    adjustments = adjustments.filter(a => a.id !== id);
+    renderAdjList();
+    if (csvData) calculate();
+  }
+
+  function renderAdjList() {
+    const list  = document.getElementById('adjList');
+    const total = document.getElementById('adjTotal');
+    if (adjustments.length === 0) {
+      list.innerHTML = '<div class="adj-empty">追記事項なし</div>';
+      total.style.display = 'none';
+      return;
+    }
+    list.innerHTML = '';
+    let sum = 0;
+    adjustments.forEach(a => {
+      const dt = new Date(a.date + 'T00:00:00');
+      const dateStr = `${dt.getMonth()+1}/${dt.getDate()}(${DOW[dt.getDay()]})`;
+      sum += a.minutes;
+      const item = document.createElement('div');
+      item.className = 'adj-item';
+      item.innerHTML = `<span class="adj-date">${dateStr}</span><span class="adj-type">${a.label}</span><span class="adj-time">+${toHM(a.minutes)}</span><button class="adj-remove" onclick="removeAdjustment(${a.id})">✕</button>`;
+      list.appendChild(item);
+    });
+    total.textContent = `追記合計: +${toHM(sum)}`;
+    total.style.display = 'block';
+  }
+
+  function getAdjMinutes(todayStr) {
+    return adjustments
+      .filter(a => a.date.replace(/-/g,'') <= todayStr)
+      .reduce((s, a) => s + a.minutes, 0);
+  }
+
+  // ---- ユーティリティ ----
+  function toHM(min) {
+    const h = Math.floor(Math.abs(min) / 60);
+    const m = Math.abs(min) % 60;
+    return `${h}:${String(m).padStart(2, '0')}`;
+  }
+  function toDiff(min) { return (min >= 0 ? '+' : '-') + toHM(min); }
+  function parseHM(str) {
+    if (!str || !str.trim()) return null;
+    const m = str.trim().match(/^(\d+):(\d+)$/);
+    return m ? parseInt(m[1]) * 60 + parseInt(m[2]) : null;
+  }
+  function setStatus(msg, isError = false) {
+    const card = document.getElementById('statusCard');
+    card.innerHTML = isError
+      ? `<div class="error-box">${msg}</div>`
+      : `<span>${msg}</span>`;
+  }
+  function toggleDetail() {
+    detailOpen = !detailOpen;
+    document.getElementById('detailWrap').style.display = detailOpen ? 'block' : 'none';
+    document.getElementById('detailToggle').textContent =
+      (detailOpen ? '▼ ' : '▶ ') + '日別詳細を' + (detailOpen ? '非表示' : '表示');
+  }
+
+  // ---- 計算 ----
+  function calculate() {
+    if (!csvData) return;
+
+    const today = new Date();
+    const todayStr = [
+      today.getFullYear(),
+      String(today.getMonth()+1).padStart(2,'0'),
+      String(today.getDate()).padStart(2,'0')
+    ].join(''); // YYYYMMDD
+
+    // 行タイプ "2" のデータ行のみ対象
+    // 列: [2]=日付(YYYYMMDD)  [5]=勤務種別  [14]=勤務時間
+    const dataRows = csvData.filter(r => r[0] === '2' && r[2] && r[2].match(/^\d{8}$/));
+
+    // 今日以前で勤務時間が記録されている行
+    const workedRows = dataRows.filter(r => r[2] <= todayStr && parseHM(r[14]) !== null);
+
+    // 月間稼働日（フレックスが入っている全日）
+    const allWorkRows = dataRows.filter(r => r[5] && r[5].includes('フレックス'));
+
+    const pastAdjs      = adjustments.filter(a => a.date.replace(/-/g,'') <= todayStr);
+    const adjMin        = pastAdjs.reduce((s, a) => s + a.minutes, 0);
+    const baseActualMin = workedRows.reduce((s, r) => s + (parseHM(r[14]) ?? 0), 0);
+    const actualMin     = baseActualMin + adjMin;
+    // 追記事項の日数も勤務日数に加算（未承認で空欄になっている日の分）
+    const requiredMin   = (workedRows.length + pastAdjs.length) * STANDARD_MIN;
+    const diffMin       = actualMin - requiredMin;
+    const monthTotalMin = allWorkRows.length * STANDARD_MIN;
+    const remainingMin  = monthTotalMin - actualMin;
+
+    // 表示
+    document.getElementById('mActual').textContent    = toHM(actualMin);
+    document.getElementById('mActualSub').textContent = adjMin > 0 ? `(表: ${toHM(baseActualMin)} + 追記: +${toHM(adjMin)})` : '';
+    document.getElementById('mWorkDays').textContent  = workedRows.length + pastAdjs.length;
+    document.getElementById('mRequired').textContent  = toHM(requiredMin);
+    document.getElementById('mDiff').textContent      = toDiff(diffMin);
+    document.getElementById('mMonthTotal').textContent = toHM(monthTotalMin);
+    document.getElementById('mMonthDays').textContent  = `${allWorkRows.length} 日`;
+    document.getElementById('mRemaining').textContent  = toHM(remainingMin);
+
+    const diffCard = document.getElementById('mDiffCard');
+    diffCard.className = 'calc-item diff-item ' + (diffMin >= 0 ? 'diff-positive' : 'diff-negative');
+    document.getElementById('mDiffLabel').textContent = diffMin >= 0 ? '過不足（超過）' : '過不足（不足）';
+
+    const dt = new Date(
+      parseInt(todayStr.slice(0,4)),
+      parseInt(todayStr.slice(4,6))-1,
+      parseInt(todayStr.slice(6,8))
+    );
+    document.getElementById('resultsDateLabel').textContent =
+      `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日 時点の集計`;
+
+    // 日別詳細
+    const tbody = document.getElementById('detailBody');
+    tbody.innerHTML = '';
+    workedRows.forEach(r => {
+      const d = r[2];
+      const dt2 = new Date(parseInt(d.slice(0,4)), parseInt(d.slice(4,6))-1, parseInt(d.slice(6,8)));
+      const dateStr = `${dt2.getMonth()+1}/${dt2.getDate()}(${DOW[dt2.getDay()]})`;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${dateStr}</td><td><span class="tag tag-working">出勤</span></td><td>${r[14]}</td>`;
+      tbody.appendChild(tr);
+    });
+    adjustments.filter(a => a.date.replace(/-/g,'') <= todayStr).forEach(a => {
+      const dt3 = new Date(a.date + 'T00:00:00');
+      const dateStr = `${dt3.getMonth()+1}/${dt3.getDate()}(${DOW[dt3.getDay()]})`;
+      const tr = document.createElement('tr');
+      tr.className = 'adj-row';
+      tr.innerHTML = `<td>${dateStr}</td><td><span class="tag tag-adj">追記: ${a.label}</span></td><td>+${toHM(a.minutes)}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    detailOpen = false;
+    document.getElementById('detailWrap').style.display = 'none';
+    document.getElementById('detailToggle').textContent = '▶ 日別詳細を表示';
+    document.getElementById('results').style.display = 'block';
+    setStatus('計算完了');
+  }
+</script>
+</body>
+</html>
