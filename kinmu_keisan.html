@@ -179,6 +179,15 @@
   <h1>勤務時間計算ツール</h1>
   <p class="subtitle">CSVファイルから直接計算 — AI・API不要・完全無料</p>
 
+  <!-- 標準勤務時間 -->
+  <div class="card">
+    <label class="field-label">標準勤務時間（1日あたり）</label>
+    <div class="adj-add-row" style="margin-bottom:0;">
+      <input type="text" id="standardHours" value="7:45" placeholder="例: 7:45" style="flex:0 0 100px;" />
+      <span style="font-size:0.82rem;color:#888;line-height:1.5;">半休はフルタイム（7:45）の場合のみ取得可能</span>
+    </div>
+  </div>
+
   <!-- CSV アップロード -->
   <div class="card">
     <label class="field-label">勤務CSVファイル（SRKINMUCSV）</label>
@@ -234,7 +243,7 @@
         <div class="calc-item">
           <div class="calc-label">③ 必要勤務時間</div>
           <div class="calc-value" id="mRequired">--:--</div>
-          <div class="calc-desc">② 勤務日数 <span id="mWorkDays">--</span>日 × 7:45</div>
+          <div class="calc-desc">② 勤務日数 <span id="mWorkDays">--</span>日 × <span id="mStandardLabel">7:45</span></div>
         </div>
         <div class="calc-arrow">=</div>
         <div class="calc-item diff-item" id="mDiffCard">
@@ -274,12 +283,60 @@
 </div>
 
 <script>
-  const STANDARD_MIN = 7 * 60 + 45;
+  const DEFAULT_STANDARD_MIN = 7 * 60 + 45;  // フルタイム = 7:45
+  const HALF_AM_MIN = 210;  // 午前半休 8:30-12:00 = 3:30（フルタイム時のみ）
+  const HALF_PM_MIN = 255;  // 午後半休 13:00-17:15 = 4:15（フルタイム時のみ）
   const DOW = ['日','月','火','水','木','金','土'];
 
   let csvData = null;
   let detailOpen = false;
   let adjustments = [];
+
+  // ---- 標準勤務時間 ----
+  function getStandardMin() {
+    const input = document.getElementById('standardHours').value.trim();
+    const m = input.match(/^(\d+):(\d+)$/);
+    if (m) {
+      const min = parseInt(m[1]) * 60 + parseInt(m[2]);
+      if (min > 0 && min < 24 * 60) return min;
+    }
+    return DEFAULT_STANDARD_MIN;
+  }
+
+  function isFullTime() {
+    return getStandardMin() === DEFAULT_STANDARD_MIN;
+  }
+
+  function updateAdjTypeUI() {
+    const std = getStandardMin();
+    const sel = document.getElementById('adjType');
+    const fullTime = isFullTime();
+    sel.options[0].textContent = `年休（全日）　+${toHM(std)}`;
+    sel.options[1].textContent = fullTime
+      ? '午前半休（8:30-12:00）　+3:30'
+      : '午前半休（フルタイムのみ）';
+    sel.options[2].textContent = fullTime
+      ? '午後半休（13:00-17:15）　+4:15'
+      : '午後半休（フルタイムのみ）';
+    sel.options[1].disabled = !fullTime;
+    sel.options[2].disabled = !fullTime;
+    if (!fullTime && (sel.value === 'am' || sel.value === 'pm')) {
+      sel.value = 'full';
+      onAdjTypeChange();
+    }
+  }
+
+  function onStandardHoursChange() {
+    const input = document.getElementById('standardHours');
+    const val = input.value.trim();
+    const m = val.match(/^(\d+):(\d+)$/);
+    const min = m ? parseInt(m[1]) * 60 + parseInt(m[2]) : 0;
+    const valid = m && min > 0 && min < 24 * 60;
+    input.style.borderColor = valid || val === '' ? '' : '#ef4444';
+    if (valid) localStorage.setItem('kinmu_standardHours', val);
+    updateAdjTypeUI();
+    if (csvData) calculate();
+  }
 
   // ---- CSV パース（Shift-JIS対応）----
   function parseCSVLine(line) {
@@ -352,14 +409,27 @@
     if (e.target.files[0]) loadCSV(e.target.files[0]);
   });
 
+  // 標準勤務時間の復元 & 入力監視
+  (function initStandardHours() {
+    const saved = localStorage.getItem('kinmu_standardHours');
+    if (saved && /^\d+:\d+$/.test(saved)) {
+      document.getElementById('standardHours').value = saved;
+    }
+    const input = document.getElementById('standardHours');
+    input.addEventListener('input', onStandardHoursChange);
+    input.addEventListener('blur', onStandardHoursChange);
+    updateAdjTypeUI();
+  })();
+
   // ---- 追記事項 ----
-  // 半休は昼休みを挟むため非対称: 午前=8:30-12:00=3:30, 午後=13:00-17:15=4:15
-  const ADJ_TYPES = {
-    full: { label: '年休（全日）', minutes: 465 },
-    am:   { label: '午前半休',    minutes: 210 },
-    pm:   { label: '午後半休',    minutes: 255 },
-    hour: { label: '時間休',      minutes: null },
-  };
+  const ADJ_LABELS = { full: '年休（全日）', am: '午前半休', pm: '午後半休', hour: '時間休' };
+
+  function getAdjMinutesByType(type) {
+    if (type === 'full') return getStandardMin();
+    if (type === 'am')   return HALF_AM_MIN;
+    if (type === 'pm')   return HALF_PM_MIN;
+    return null;
+  }
 
   function onAdjTypeChange() {
     document.getElementById('adjHourInput').style.display =
@@ -371,6 +441,10 @@
     const type    = document.getElementById('adjType').value;
     const hourStr = document.getElementById('adjHourInput').value.trim();
     if (!dateVal) { alert('日付を入力してください'); return; }
+    if ((type === 'am' || type === 'pm') && !isFullTime()) {
+      alert('午前半休・午後半休はフルタイム（標準勤務時間 7:45）のときのみ取得できます');
+      return;
+    }
     let minutes;
     if (type === 'hour') {
       const m = hourStr.match(/^(\d+):(\d+)$/);
@@ -378,9 +452,9 @@
       minutes = parseInt(m[1]) * 60 + parseInt(m[2]);
       if (minutes <= 0) { alert('0より大きい時間を入力してください'); return; }
     } else {
-      minutes = ADJ_TYPES[type].minutes;
+      minutes = getAdjMinutesByType(type);
     }
-    const label = type === 'hour' ? `時間休 ${hourStr}` : ADJ_TYPES[type].label;
+    const label = type === 'hour' ? `時間休 ${hourStr}` : ADJ_LABELS[type];
     adjustments.push({ id: Date.now(), date: dateVal, minutes, label });
     renderAdjList();
     if (csvData) calculate();
@@ -471,16 +545,18 @@
     const adjMin        = pastAdjs.reduce((s, a) => s + a.minutes, 0);
     const baseActualMin = workedRows.reduce((s, r) => s + (parseHM(r[14]) ?? 0), 0);
     const actualMin     = baseActualMin + adjMin;
+    const stdMin        = getStandardMin();
     // 追記事項の日数も勤務日数に加算（未承認で空欄になっている日の分）
-    const requiredMin   = (workedRows.length + pastAdjs.length) * STANDARD_MIN;
+    const requiredMin   = (workedRows.length + pastAdjs.length) * stdMin;
     const diffMin       = actualMin - requiredMin;
-    const monthTotalMin = allWorkRows.length * STANDARD_MIN;
+    const monthTotalMin = allWorkRows.length * stdMin;
     const remainingMin  = monthTotalMin - actualMin;
 
     // 表示
     document.getElementById('mActual').textContent    = toHM(actualMin);
     document.getElementById('mActualSub').textContent = adjMin > 0 ? `(表: ${toHM(baseActualMin)} + 追記: +${toHM(adjMin)})` : '';
     document.getElementById('mWorkDays').textContent  = workedRows.length + pastAdjs.length;
+    document.getElementById('mStandardLabel').textContent = toHM(stdMin);
     document.getElementById('mRequired').textContent  = toHM(requiredMin);
     document.getElementById('mDiff').textContent      = toDiff(diffMin);
     document.getElementById('mMonthTotal').textContent = toHM(monthTotalMin);
