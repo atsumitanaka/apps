@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>受験スケジュール：筑波大 × NIMSジュニア（2027年4月入学）</title>
+<style>
+  :root {
+    --tsukuba: #2563eb;
+    --tsukuba-bg: #dbeafe;
+    --nims: #ea580c;
+    --nims-bg: #ffedd5;
+    --urgent: #dc2626;
+    --done: #6b7280;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px;
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  header {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+  h1 { margin: 0 0 8px 0; font-size: 22px; }
+  .subtitle { color: var(--muted); font-size: 14px; }
+  .today {
+    display: inline-block;
+    background: var(--urgent);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  h2 {
+    font-size: 18px;
+    margin: 28px 0 12px;
+    padding-left: 10px;
+    border-left: 4px solid var(--text);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+
+  /* 資格判定テーブル */
+  table.eligibility {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  table.eligibility th, table.eligibility td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.eligibility th {
+    background: #f3f4f6;
+    font-weight: 600;
+  }
+  .badge-ok { color: #059669; font-weight: 600; }
+  .badge-warn { color: #d97706; font-weight: 600; }
+  .badge-stop { color: #dc2626; font-weight: 600; }
+
+  /* タイムライン */
+  .timeline {
+    position: relative;
+    margin: 16px 0;
+    padding-left: 40px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .event {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+  }
+  .event::before {
+    content: '';
+    position: absolute;
+    left: -32px;
+    top: 16px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 3px solid var(--border);
+  }
+  .event.tsukuba { border-left: 5px solid var(--tsukuba); }
+  .event.tsukuba::before { border-color: var(--tsukuba); }
+  .event.nims { border-left: 5px solid var(--nims); }
+  .event.nims::before { border-color: var(--nims); }
+  .event.urgent { background: #fef2f2; border-color: var(--urgent); }
+  .event.urgent::before { border-color: var(--urgent); background: var(--urgent); }
+
+  .event-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+  }
+  .date {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .pill.tsukuba { background: var(--tsukuba-bg); color: var(--tsukuba); }
+  .pill.nims { background: var(--nims-bg); color: var(--nims); }
+  .pill.urgent { background: var(--urgent); color: white; }
+  .phase {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+  .action {
+    font-size: 14px;
+    color: var(--text);
+  }
+  .action code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ポイント */
+  .points ol { margin: 0; padding-left: 22px; }
+  .points li { margin-bottom: 8px; font-size: 14px; }
+
+  /* 連絡先 */
+  table.contacts {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  table.contacts td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  table.contacts td:first-child { font-weight: 600; width: 35%; }
+  table.contacts code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+
+  /* 凡例 */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin: 8px 0 16px;
+    font-size: 13px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  /* ダウンロード警告ボックス（最上部） */
+  .download-alert {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 3px solid #f59e0b;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .download-alert .alert-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #92400e;
+    margin: 0 0 10px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .download-alert .alert-body {
+    font-size: 14px;
+    color: #78350f;
+    margin-bottom: 12px;
+  }
+  .download-alert .alert-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .download-alert .alert-link {
+    background: white;
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+    transition: transform 0.1s;
+  }
+  .download-alert .alert-link:hover { transform: translateX(4px); }
+  .download-alert .alert-link strong { font-weight: 700; }
+
+  /* タイムライン内のダウンロード注記 */
+  .download-note {
+    background: #fffbeb;
+    border: 2px solid #f59e0b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #78350f;
+  }
+  .download-note .dl-title {
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .download-note a {
+    color: #b45309;
+    word-break: break-all;
+  }
+
+  /* 出願資格セルフチェック */
+  .eligibility-check { padding: 4px 0; }
+  .req-group {
+    margin-bottom: 16px;
+  }
+  .req-group-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    background: #f3f4f6;
+    border-radius: 6px;
+  }
+  .req-group-title.group-A { color: #059669; background: #d1fae5; }
+  .req-group-title.group-B { color: #b91c1c; background: #fee2e2; }
+  .req-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .req-item:hover { background: #f9fafb; }
+  .req-item input[type="radio"] {
+    margin-top: 4px;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  .req-item.checked-ok {
+    background: #ecfdf5;
+    border-color: #10b981;
+  }
+  .req-item.checked-warn {
+    background: #fffbeb;
+    border-color: #f59e0b;
+  }
+  .req-item.checked-stop {
+    background: #fef2f2;
+    border-color: #dc2626;
+  }
+  .req-label {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .req-num {
+    display: inline-block;
+    font-weight: 700;
+    background: #f3f4f6;
+    padding: 1px 8px;
+    border-radius: 4px;
+    margin-right: 6px;
+    font-size: 13px;
+  }
+  .verdict {
+    margin-top: 16px;
+    padding: 16px 18px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    font-size: 14px;
+    display: none;
+  }
+  .verdict.show { display: block; }
+  .verdict.ok {
+    background: #d1fae5;
+    border-color: #059669;
+    color: #065f46;
+  }
+  .verdict.warn {
+    background: #fef3c7;
+    border-color: #d97706;
+    color: #92400e;
+  }
+  .verdict.stop {
+    background: #fee2e2;
+    border-color: #b91c1c;
+    color: #7f1d1d;
+  }
+  .verdict-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .verdict-body { font-size: 14px; line-height: 1.6; }
+  .verdict-body code {
+    background: rgba(255,255,255,0.6);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .reset-btn {
+    margin-top: 12px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .reset-btn:hover { background: #f9fafb; }
+  .screening-notes {
+    margin-top: 16px;
+    padding: 14px 16px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #7c2d12;
+  }
+  .screening-notes h4 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    color: #9a3412;
+  }
+  .screening-notes ul { margin: 4px 0; padding-left: 20px; }
+  .screening-notes li { margin-bottom: 4px; }
+
+  /* 印刷 */
+  @media print {
+    body { background: white; }
+    .card, header { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>受験スケジュール：筑波大 国際マテリアルズイノベーション学位 × NIMSジュニア</h1>
+    <div class="subtitle">2027年4月入学｜筑波大10月実施・NIMSジュニア7月公募</div>
+    <div class="today">本日 2026-06-25（木） — NIMS応募開始まで6日</div>
+  </header>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:var(--tsukuba)"></span>筑波大</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--nims)"></span>NIMSジュニア</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--urgent)"></span>重要・緊急</span>
+  </div>
+
+  <div class="download-alert">
+    <div class="alert-title">⚠️ 提出書類は必ず公式ページから最新様式をダウンロードすること</div>
+    <div class="alert-body">
+      申請書・履歴書・出願書類の様式は毎年度更新される可能性があります。<strong>応募・出願の都度、下記公式ページにアクセスして最新版のファイルをダウンロード</strong>してください。手元の古い様式や他人のコピーは絶対に流用しないこと。
+    </div>
+    <div class="alert-links">
+      <a class="alert-link" href="https://www.nims.go.jp/tsukuba/junior/" target="_blank">
+        <span class="pill nims">NIMSジュニア</span>
+        <strong>https://www.nims.go.jp/tsukuba/junior/</strong>
+        <span style="color:var(--muted); font-size:12px;">（申請書Word・履歴書Excel）</span>
+      </a>
+      <a class="alert-link" href="https://www.ap-graduate.tsukuba.ac.jp/course/pas/first_all/" target="_blank">
+        <span class="pill tsukuba">筑波大</span>
+        <strong>https://www.ap-graduate.tsukuba.ac.jp/course/pas/first_all/</strong>
+        <span style="color:var(--muted); font-size:12px;">（募集要項・出願書類様式）</span>
+      </a>
+    </div>
+  </div>
+
+  <h2>ステップ0：筑波大 出願資格の自己判定</h2>
+  <div class="card eligibility-check">
+    <p style="margin:0 0 12px 0; font-size:14px; color:var(--muted);">
+      自分の学歴に最も近い項目を1つ選択してください。下に判定結果が表示されます。<br>
+      <strong>出典：</strong>筑波大学「大学院出願資格（有無）及び出願資格審査申請について」(t1-1.pdf)
+    </p>
+
+    <div class="req-group">
+      <div class="req-group-title group-A">A. 出願資格審査を要しない者（要件1〜8）</div>
+
+      <label class="req-item" data-result="ok">
+        <input type="radio" name="eligibility" value="1">
+        <div class="req-label"><span class="req-num">(1)</span>日本国内の4年制大学を卒業／入学月の前月までに卒業見込み</div>
+      </label>
+
+      <label class="req-item" data-result="ok">
+        <input type="radio" name="eligibility" value="2">
+        <div class="req-label"><span class="req-num">(2)</span>大学改革支援・学位授与機構により学士の学位を授与／授与見込み</div>
+      </label>
+
+      <label class="req-item" data-result="ok">
+        <input type="radio" name="eligibility" value="3">
+        <div class="req-label"><span class="req-num">(3)</span>外国において学校教育における16年の課程を修了／修了見込み（小学校から大学卒業までに16年以上を要する外国の大学を卒業した者）</div>
+      </label>
+
+      <label class="req-item" data-result="ok">
+        <input type="radio" name="eligibility" value="4">
+        <div class="req-label"><span class="req-num">(4)</span>外国学校の通信教育を日本国内で履修し、当該外国の16年課程を修了／修了見込み</div>
+      </label>
+
+      <label class="req-item" data-result="ok">
+        <input type="radio" name="eligibility" value="5">
+        <div class="req-label"><span class="req-num">(5)</span>文部科学大臣指定外国大学日本校の課程を修了／修了見込み</div>
+      </label>
+
+      <label class="req-item" data-result="warn">
+        <input type="radio" name="eligibility" value="6">
+        <div class="req-label"><span class="req-num">(6)</span>外国の大学等で<strong>修業年限3年以上</strong>の課程を修了し、学士相当の学位を授与／取得見込み（外国で16年に満たない課程を修了し学士を取得した者を含む）</div>
+      </label>
+
+      <label class="req-item" data-result="ok">
+        <input type="radio" name="eligibility" value="7">
+        <div class="req-label"><span class="req-num">(7)</span>文部科学大臣指定専修学校専門課程を修了／修了見込み</div>
+      </label>
+
+      <label class="req-item" data-result="ok">
+        <input type="radio" name="eligibility" value="8">
+        <div class="req-label"><span class="req-num">(8)</span>文部科学大臣の指定した者（防衛大学校・水産大学校・気象大学校等の卒業者、教員専修／一種免許状を有する22歳以上の者 等）</div>
+      </label>
+    </div>
+
+    <div class="req-group">
+      <div class="req-group-title group-B">B. 出願資格審査を要する者（要件9〜11）</div>
+
+      <label class="req-item" data-result="stop">
+        <input type="radio" name="eligibility" value="9">
+        <div class="req-label"><span class="req-num">(9)</span>個別の出願資格審査により大学卒業相当の学力があると認められる、22歳に達した（又は入学月の前月までに達する）者</div>
+      </label>
+
+      <label class="req-item" data-result="stop">
+        <input type="radio" name="eligibility" value="10">
+        <div class="req-label"><span class="req-num">(10)</span>大学に3年以上在学し、本学大学院の所定単位を優秀な成績で修得した者</div>
+      </label>
+
+      <label class="req-item" data-result="stop">
+        <input type="radio" name="eligibility" value="11">
+        <div class="req-label"><span class="req-num">(11)</span>外国で学校教育における15年の課程を修了し（通学／通信）、本学大学院の所定単位を優秀な成績で修得した者</div>
+      </label>
+    </div>
+
+    <div class="req-group">
+      <label class="req-item" data-result="unknown">
+        <input type="radio" name="eligibility" value="unknown">
+        <div class="req-label"><span class="req-num">?</span>いずれにも該当しない／判断できない</div>
+      </label>
+    </div>
+
+    <div id="verdict" class="verdict">
+      <div class="verdict-title" id="verdict-title"></div>
+      <div class="verdict-body" id="verdict-body"></div>
+    </div>
+    <button class="reset-btn" onclick="resetEligibility()">クリア</button>
+
+    <div class="screening-notes">
+      <h4>📋 出願資格審査(B)に該当する場合の注意事項</h4>
+      <ul>
+        <li><strong>提出書類：</strong>(ア)出願者調書（指定様式）／(イ)学歴・研究歴・職歴調書（指定様式）／(ウ)卒業証明書等（大学以降の学歴がわかる写し可）／(エ)その他学術院が必要と認める書類</li>
+        <li><strong>検定料：</strong>審査結果が出るまで払い込まないこと</li>
+        <li><strong>郵送：</strong>角形2号封筒（縦332mm × 横240mm）を自分で用意、書留速達で申請期間内必着</li>
+        <li><strong>提出先・問い合わせ先：</strong><a href="https://www.tsukuba.ac.jp/admission/graduate-overview/shikaku/" target="_blank">https://www.tsukuba.ac.jp/admission/graduate-overview/shikaku/</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const verdictData = {
+      ok: {
+        cls: 'ok',
+        title: '✅ 出願資格審査は不要です',
+        body: '直接、通常の出願プロセス（検定料払込・Web出願・書類郵送）に進めます。<br>このスケジュール上では <strong>ステップ8（2026-08-31〜09-10）の出願期間</strong>からアクションを開始してください。'
+      },
+      warn: {
+        cls: 'warn',
+        title: '⚠️ 出願資格審査は不要ですが、事前問い合わせが必須です',
+        body: '要件(6)に該当する場合、出願前にあらかじめ入試課（大学院入試）への問い合わせが必要です。<br><br><strong>連絡先：</strong> <code>admission.grad@un.tsukuba.ac.jp</code>（「#@#」を「@」に置換）<br><br>卒業証明書・成績証明書（修業年限がわかるもの）を添付し、<strong>2026年8月25日の出願資格審査申請期限より十分前（できれば7月中）</strong>に連絡してください。期限間際だと確認が間に合わない可能性があります。'
+      },
+      stop: {
+        cls: 'stop',
+        title: '🟥 出願資格審査が必要です',
+        body: '出願前に出願資格審査の申請を行ない、審査の結果「出願資格あり」と認定された場合のみ出願できます。<br><br><strong>申請期限：</strong> 2026年8月25日（火）<br><strong>提出書類：</strong> 出願者調書・学歴/研究歴/職歴調書・卒業証明書等・その他必要書類<br><strong>注意：</strong> 検定料は審査結果が出るまで払い込まないこと。<br><br>このスケジュール上では <strong>ステップ7（〜2026-08-25）</strong>が該当します。'
+      },
+      unknown: {
+        cls: 'warn',
+        title: '⚠️ 個別に問い合わせて確認してください',
+        body: '該当要件が明確でない場合は、出願前に入試課（大学院入試）に直接問い合わせて判定を受けることを推奨します。<br><br><strong>連絡先：</strong> <code>admission.grad@un.tsukuba.ac.jp</code>（「#@#」を「@」に置換）<br><strong>参考：</strong> <a href="https://www.tsukuba.ac.jp/admission/graduate-overview/shikaku/" target="_blank">大学院 出願資格審査に関する問い合わせ先一覧</a>'
+      }
+    };
+
+    document.querySelectorAll('input[name="eligibility"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        document.querySelectorAll('.req-item').forEach(item => {
+          item.classList.remove('checked-ok', 'checked-warn', 'checked-stop');
+        });
+        const label = e.target.closest('.req-item');
+        const result = label.dataset.result;
+        if (result === 'ok') label.classList.add('checked-ok');
+        else if (result === 'warn') label.classList.add('checked-warn');
+        else if (result === 'stop') label.classList.add('checked-stop');
+        else label.classList.add('checked-warn');
+
+        const data = verdictData[result];
+        const v = document.getElementById('verdict');
+        v.className = 'verdict show ' + data.cls;
+        document.getElementById('verdict-title').innerHTML = data.title;
+        document.getElementById('verdict-body').innerHTML = data.body;
+        v.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+
+    function resetEligibility() {
+      document.querySelectorAll('input[name="eligibility"]').forEach(i => i.checked = false);
+      document.querySelectorAll('.req-item').forEach(item => {
+        item.classList.remove('checked-ok', 'checked-warn', 'checked-stop');
+      });
+      document.getElementById('verdict').className = 'verdict';
+    }
+  </script>
+
+  <h2>統合タイムライン</h2>
+  <div class="timeline">
+
+    <div class="event tsukuba urgent">
+      <div class="event-header">
+        <span class="date">今すぐ</span>
+        <span class="pill tsukuba">筑波大</span>
+        <span class="pill urgent">最優先</span>
+        <span class="phase">資格判定</span>
+      </div>
+      <div class="action">出願資格要件(1)〜(6)のどれに該当するか自己判定</div>
+    </div>
+
+    <div class="event tsukuba urgent">
+      <div class="event-header">
+        <span class="date">〜2026-06-30(火)目安</span>
+        <span class="pill tsukuba">筑波大</span>
+        <span class="pill urgent">早めに</span>
+        <span class="phase">事前確認</span>
+      </div>
+      <div class="action">
+        要件(6)該当・判定に迷う場合は入試課にメール照会<br>
+        <code>admission.grad@un.tsukuba.ac.jp</code> へ卒業証明書・成績証明書を添付
+      </div>
+    </div>
+
+    <div class="event nims">
+      <div class="event-header">
+        <span class="date">2026-07-01(水)</span>
+        <span class="pill nims">NIMSジュニア</span>
+        <span class="phase">応募開始</span>
+      </div>
+      <div class="action">募集要項・申請書様式を確認、書類準備開始</div>
+      <div class="download-note">
+        <div class="dl-title">📥 公式ページから最新様式をダウンロード</div>
+        👉 <a href="https://www.nims.go.jp/tsukuba/junior/" target="_blank">https://www.nims.go.jp/tsukuba/junior/</a><br>
+        申請書（Word）・履歴書（Excel）の指定様式を取得してください。
+      </div>
+    </div>
+
+    <div class="event nims">
+      <div class="event-header">
+        <span class="date">7月上旬〜中旬</span>
+        <span class="pill nims">NIMSジュニア</span>
+        <span class="phase">書類準備</span>
+      </div>
+      <div class="action">
+        申請書（Word）／履歴書（Excel）／成績証明書／英語スコア<br>
+        <span class="note">英語スコア＝TOEIC・TOEFL・IELTSのいずれか、2年以内のもの<br>照会者2名以上の連絡先を確保</span>
+      </div>
+    </div>
+
+    <div class="event nims urgent">
+      <div class="event-header">
+        <span class="date">2026-07-30(木)</span>
+        <span class="pill nims">NIMSジュニア</span>
+        <span class="pill urgent">締切</span>
+        <span class="phase">応募締切</span>
+      </div>
+      <div class="action">
+        件名 <code>[Tsukuba-NIMS GRA]Application</code> で <code>nims-graduate@nims.go.jp</code> へ提出
+      </div>
+    </div>
+
+    <div class="event nims">
+      <div class="event-header">
+        <span class="date">2026-08上旬</span>
+        <span class="pill nims">NIMSジュニア</span>
+        <span class="phase">書類審査</span>
+      </div>
+      <div class="action">書類審査結果通知</div>
+    </div>
+
+    <div class="event nims">
+      <div class="event-header">
+        <span class="date">2026-08中下旬</span>
+        <span class="pill nims">NIMSジュニア</span>
+        <span class="phase">面接</span>
+      </div>
+      <div class="action">NIMSジュニア面接</div>
+    </div>
+
+    <div class="event tsukuba urgent">
+      <div class="event-header">
+        <span class="date">〜2026-08-25(火)</span>
+        <span class="pill tsukuba">筑波大</span>
+        <span class="pill urgent">締切</span>
+        <span class="phase">出願資格審査</span>
+      </div>
+      <div class="action">
+        <strong>要審査者のみ</strong>：申請書類提出（出願者調書・学歴調書・研究計画書 等）
+      </div>
+      <div class="download-note">
+        <div class="dl-title">📥 公式ページから審査申請様式をダウンロード</div>
+        👉 <a href="https://www.ap-graduate.tsukuba.ac.jp/course/pas/first_all/" target="_blank">https://www.ap-graduate.tsukuba.ac.jp/course/pas/first_all/</a><br>
+        出願資格審査用の様式・提出書類一覧を確認して取得してください。
+      </div>
+    </div>
+
+    <div class="event tsukuba">
+      <div class="event-header">
+        <span class="date">2026-08-31(月)〜09-10(木)</span>
+        <span class="pill tsukuba">筑波大</span>
+        <span class="phase">出願</span>
+      </div>
+      <div class="action">検定料払込・Web出願</div>
+      <div class="download-note">
+        <div class="dl-title">📥 公式ページから募集要項・出願書類様式をダウンロード</div>
+        👉 <a href="https://www.ap-graduate.tsukuba.ac.jp/course/pas/first_all/" target="_blank">https://www.ap-graduate.tsukuba.ac.jp/course/pas/first_all/</a><br>
+        Web出願システムへの入力前に、最新の募集要項と出願書類様式を必ず取得してください。
+      </div>
+    </div>
+
+    <div class="event tsukuba urgent">
+      <div class="event-header">
+        <span class="date">〜2026-09-11(金)</span>
+        <span class="pill tsukuba">筑波大</span>
+        <span class="pill urgent">締切</span>
+        <span class="phase">出願</span>
+      </div>
+      <div class="action">出願書類郵送</div>
+    </div>
+
+    <div class="event tsukuba">
+      <div class="event-header">
+        <span class="date">2026-10-08(木), 10-13(火)〜15(木)</span>
+        <span class="pill tsukuba">筑波大</span>
+        <span class="phase">試験</span>
+      </div>
+      <div class="action">筆記・口述試験</div>
+    </div>
+
+    <div class="event tsukuba urgent">
+      <div class="event-header">
+        <span class="date">2026-10-30(金) 10:00</span>
+        <span class="pill tsukuba">筑波大</span>
+        <span class="pill urgent">結果発表</span>
+        <span class="phase">結果</span>
+      </div>
+      <div class="action">筑波大 合格発表・入学手続案内送付</div>
+    </div>
+
+    <div class="event nims">
+      <div class="event-header">
+        <span class="date">2026-10下旬</span>
+        <span class="pill nims">NIMSジュニア</span>
+        <span class="phase">結果</span>
+      </div>
+      <div class="action">NIMSジュニア 最終結果発表</div>
+    </div>
+
+  </div>
+
+  <h2>ポイント</h2>
+  <div class="card points">
+    <ol>
+      <li><strong>直近1週間が勝負</strong>：今日(6/24)〜NIMS応募開始(7/1)の間に、筑波大の資格判定と（必要なら）事前確認メールを済ませる</li>
+      <li><strong>NIMS書類審査(8月上旬)で不通過の場合</strong>：筑波大単独で受験は可能だがNIMS連携の特典は受けられない。判定結果を見て筑波出願の本気度を調整できる</li>
+      <li><strong>要件(6)該当者の特殊事情</strong>：事前確認メールは出願資格審査(8/25)とは別物で、もっと早めに片付けるべき手続き。7月中に確認を取っておけば8月以降は出願書類準備に集中できる</li>
+      <li><strong>英語スコアは応募締切必着</strong>：TOEIC/TOEFL/IELTSのスコア発行に2〜4週間かかるため、未受験なら最優先で受験予約</li>
+    </ol>
+  </div>
+
+  <h2>連絡先</h2>
+  <div class="card">
+    <table class="contacts">
+      <tr>
+        <td>筑波大 出願資格 事前確認</td>
+        <td><code>admission.grad@un.tsukuba.ac.jp</code></td>
+      </tr>
+      <tr>
+        <td>筑波大 出願書類提出（郵送）</td>
+        <td>筑波大学数理物質エリア支援室（大学院教務）</td>
+      </tr>
+      <tr>
+        <td>NIMSジュニア 応募</td>
+        <td><code>nims-graduate@nims.go.jp</code>（件名 <code>[Tsukuba-NIMS GRA]Application</code>）</td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>参考URL</h2>
+  <div class="card">
+    <ul style="margin:0; padding-left:20px;">
+      <li><a href="https://www.ap-graduate.tsukuba.ac.jp/course/pas/first_all/" target="_blank">筑波大 数理物質科学研究群 入試情報</a></li>
+      <li><a href="https://www.nims.go.jp/tsukuba/junior/" target="_blank">NIMSジュニア研究員制度</a></li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
