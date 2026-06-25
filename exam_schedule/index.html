@@ -46,6 +46,28 @@
     font-weight: 600;
     margin-top: 8px;
   }
+  .lang-switch {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .lang-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 13px;
+    color: var(--muted);
+    background: #f3f4f6;
+    border: 1px solid var(--border);
+    transition: background 0.15s, color 0.15s;
+  }
+  .lang-btn:hover { background: #e5e7eb; }
+  .lang-btn.active {
+    background: var(--text);
+    color: white;
+    border-color: var(--text);
+    pointer-events: none;
+  }
   h2 {
     font-size: 18px;
     margin: 28px 0 12px;
@@ -398,6 +420,10 @@
 <div class="container">
 
   <header>
+    <div class="lang-switch">
+      <a href="index.html" class="lang-btn active">🇯🇵 日本語</a>
+      <a href="index_en.html" class="lang-btn">🇬🇧 English</a>
+    </div>
     <h1>受験スケジュール：筑波大 国際マテリアルズイノベーション学位 × NIMSジュニア</h1>
     <div class="subtitle">2027年4月入学｜筑波大10月実施・NIMSジュニア7月公募</div>
     <div class="today">本日 2026-06-25（木） — NIMS応募開始まで6日</div>
