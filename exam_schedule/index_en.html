@@ -9,6 +9,8 @@
     --tsukuba-bg: #dbeafe;
     --nims: #ea580c;
     --nims-bg: #ffedd5;
+    --extra: #7c3aed;
+    --extra-bg: #ede9fe;
     --urgent: #dc2626;
     --done: #6b7280;
     --bg: #fafafa;
@@ -138,8 +140,17 @@
   .event.tsukuba::before { border-color: var(--tsukuba); }
   .event.nims { border-left: 5px solid var(--nims); }
   .event.nims::before { border-color: var(--nims); }
+  .event.extra {
+    border-left: 5px solid var(--extra);
+    background: #faf5ff;
+    border-color: var(--extra);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+  }
+  .event.extra::before { border-color: var(--extra); background: var(--extra); }
   .event.urgent { background: #fef2f2; border-color: var(--urgent); }
   .event.urgent::before { border-color: var(--urgent); background: var(--urgent); }
+  .event.extra.urgent { background: #faf5ff; border-color: var(--extra); }
+  .event.extra.urgent::before { border-color: var(--extra); background: var(--extra); }
 
   .event-header {
     display: flex;
@@ -161,6 +172,7 @@
   }
   .pill.tsukuba { background: var(--tsukuba-bg); color: var(--tsukuba); }
   .pill.nims { background: var(--nims-bg); color: var(--nims); }
+  .pill.extra { background: var(--extra-bg); color: var(--extra); }
   .pill.urgent { background: var(--urgent); color: white; }
   .phase {
     font-size: 12px;
@@ -395,12 +407,13 @@
     </div>
     <h1>Admission Schedule: Tsukuba Materials Innovation × NIMS Graduate Research Assistantship</h1>
     <div class="subtitle">April 2027 Enrollment · Tsukuba October Examination · NIMS July 2026 Call</div>
-    <div class="today">Today: 2026-06-25 (Thu) — NIMS application opens in 6 days</div>
+    <div class="today">Today: 2026-06-30 (Tue) — NIMS application opens in 1 day</div>
   </header>
 
   <div class="legend">
     <span class="legend-item"><span class="legend-dot" style="background:var(--tsukuba)"></span>Tsukuba</span>
     <span class="legend-item"><span class="legend-dot" style="background:var(--nims)"></span>NIMS</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--extra)"></span>Extra task</span>
     <span class="legend-item"><span class="legend-dot" style="background:var(--urgent)"></span>Urgent</span>
   </div>
 
@@ -623,6 +636,29 @@
       </div>
     </div>
 
+    <div class="event extra urgent">
+      <div class="event-header">
+        <span class="date">By 2026-07-17 (Fri)</span>
+        <span class="pill extra">Extra task</span>
+        <span class="pill urgent">Top priority</span>
+        <span class="phase">Presentation slides</span>
+      </div>
+      <div class="action">
+        Prepare and submit interview presentation slides <strong>in parallel with the application</strong> — added on top of the standard schedule, do not wait for screening results<br>
+        <span class="note">Use the designated PowerPoint template. Read the reference article below before drafting.</span>
+      </div>
+      <div class="download-note">
+        <div class="dl-title">📥 Download the designated PowerPoint template</div>
+        👉 <a href="Research_presentation_guide.pptx" download>Research_presentation_guide.pptx</a><br>
+        <span style="color:var(--muted); font-size:12px;">Downloads directly whether opened locally or via GitHub Pages</span>
+      </div>
+      <div class="download-note">
+        <div class="dl-title">📖 Required reading for slide preparation</div>
+        👉 <a href="https://note.com/yukarikatsura/n/n56f57f00ac75" target="_blank">https://note.com/yukarikatsura/n/n56f57f00ac75</a><br>
+        Read the article, then build the deck using the template above.
+      </div>
+    </div>
+
     <div class="event nims urgent">
       <div class="event-header">
         <span class="date">2026-07-30 (Thu)</span>
@@ -727,7 +763,8 @@
   <h2>Key Points</h2>
   <div class="card points">
     <ol>
-      <li><strong>The next 7 days are critical:</strong> Between today (6/24) and the NIMS application opening (7/1), complete your Tsukuba eligibility self-assessment and (if necessary) send the pre-confirmation email.</li>
+      <li><strong>Only 1 day until NIMS applications open:</strong> Between today (6/30) and the NIMS application opening (7/1), complete your Tsukuba eligibility self-assessment and (if necessary) send the pre-confirmation email today.</li>
+      <li><strong>[Extra task · Top priority] Build the interview slides in parallel — submit by 7/17 (Fri):</strong> The presentation slides used after the document screening cannot wait for the early-August result. Read the <a href="https://note.com/yukarikatsura/n/n56f57f00ac75" target="_blank">reference article</a> and prepare the deck using the <a href="Research_presentation_guide.pptx" download><strong>designated template</strong></a>, then submit by 7/17.</li>
       <li><strong>If you fail the NIMS document screening (early August):</strong> You can still apply to Tsukuba independently, but you will not receive NIMS-affiliated benefits. Adjust your Tsukuba preparation intensity accordingly.</li>
       <li><strong>Special note for Requirement (6) applicants:</strong> The pre-confirmation email is separate from Eligibility Screening (8/25) and should be done earlier. Finish it in July so August can be dedicated to application document preparation.</li>
       <li><strong>English test scores must arrive by the deadline:</strong> Official score reports for TOEIC / TOEFL / IELTS take 2–4 weeks to issue. If you have not yet taken the test, book it immediately.</li>
@@ -758,6 +795,7 @@
       <li><a href="https://eng.ap-graduate.tsukuba.ac.jp/course/pas/first_all/" target="_blank">University of Tsukuba — Application Guidelines for Master's Programs (English)</a></li>
       <li><a href="https://www.nims.go.jp/tsukuba/en/junior/" target="_blank">NIMS Graduate Research Assistantship (English)</a></li>
       <li><a href="https://t-imi.org/en/" target="_blank">Master's and Doctoral Program in Materials Innovation</a></li>
+      <li><a href="https://note.com/yukarikatsura/n/n56f57f00ac75" target="_blank">Reference article on preparing presentation slides (note, by Yukari Katsura — Japanese)</a></li>
     </ul>
   </div>
 

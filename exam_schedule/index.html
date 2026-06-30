@@ -9,6 +9,8 @@
     --tsukuba-bg: #dbeafe;
     --nims: #ea580c;
     --nims-bg: #ffedd5;
+    --extra: #7c3aed;
+    --extra-bg: #ede9fe;
     --urgent: #dc2626;
     --done: #6b7280;
     --bg: #fafafa;
@@ -140,8 +142,17 @@
   .event.tsukuba::before { border-color: var(--tsukuba); }
   .event.nims { border-left: 5px solid var(--nims); }
   .event.nims::before { border-color: var(--nims); }
+  .event.extra {
+    border-left: 5px solid var(--extra);
+    background: #faf5ff;
+    border-color: var(--extra);
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
+  }
+  .event.extra::before { border-color: var(--extra); background: var(--extra); }
   .event.urgent { background: #fef2f2; border-color: var(--urgent); }
   .event.urgent::before { border-color: var(--urgent); background: var(--urgent); }
+  .event.extra.urgent { background: #faf5ff; border-color: var(--extra); }
+  .event.extra.urgent::before { border-color: var(--extra); background: var(--extra); }
 
   .event-header {
     display: flex;
@@ -163,6 +174,7 @@
   }
   .pill.tsukuba { background: var(--tsukuba-bg); color: var(--tsukuba); }
   .pill.nims { background: var(--nims-bg); color: var(--nims); }
+  .pill.extra { background: var(--extra-bg); color: var(--extra); }
   .pill.urgent { background: var(--urgent); color: white; }
   .phase {
     font-size: 12px;
@@ -426,12 +438,13 @@
     </div>
     <h1>受験スケジュール：筑波大 国際マテリアルズイノベーション学位 × NIMSジュニア</h1>
     <div class="subtitle">2027年4月入学｜筑波大10月実施・NIMSジュニア7月公募</div>
-    <div class="today">本日 2026-06-25（木） — NIMS応募開始まで6日</div>
+    <div class="today">本日 2026-06-30（火） — NIMS応募開始まで1日</div>
   </header>
 
   <div class="legend">
     <span class="legend-item"><span class="legend-dot" style="background:var(--tsukuba)"></span>筑波大</span>
     <span class="legend-item"><span class="legend-dot" style="background:var(--nims)"></span>NIMSジュニア</span>
+    <span class="legend-item"><span class="legend-dot" style="background:var(--extra)"></span>追加タスク</span>
     <span class="legend-item"><span class="legend-dot" style="background:var(--urgent)"></span>重要・緊急</span>
   </div>
 
@@ -654,6 +667,29 @@
       </div>
     </div>
 
+    <div class="event extra urgent">
+      <div class="event-header">
+        <span class="date">〜2026-07-17(金)</span>
+        <span class="pill extra">追加タスク</span>
+        <span class="pill urgent">最重要</span>
+        <span class="phase">プレゼン資料</span>
+      </div>
+      <div class="action">
+        面接で使用するプレゼン資料を<strong>書類応募と並行して先行作成・提出</strong>（通常スケジュールに追加）<br>
+        <span class="note">所定のテンプレ（PowerPoint）を使用すること。作成前に下記参考記事を必読</span>
+      </div>
+      <div class="download-note">
+        <div class="dl-title">📥 所定テンプレ（PowerPoint）をダウンロード</div>
+        👉 <a href="Research_presentation_guide.pptx" download>Research_presentation_guide.pptx</a><br>
+        <span style="color:var(--muted); font-size:12px;">ローカル / GitHub Pages いずれからでも直接ダウンロードできます</span>
+      </div>
+      <div class="download-note">
+        <div class="dl-title">📖 プレゼン資料作成の参考記事（必読）</div>
+        👉 <a href="https://note.com/yukarikatsura/n/n56f57f00ac75" target="_blank">https://note.com/yukarikatsura/n/n56f57f00ac75</a><br>
+        記事を読んだ上で、上記の所定テンプレに沿って作成してください。
+      </div>
+    </div>
+
     <div class="event nims urgent">
       <div class="event-header">
         <span class="date">2026-07-30(木)</span>
@@ -758,7 +794,8 @@
   <h2>ポイント</h2>
   <div class="card points">
     <ol>
-      <li><strong>直近1週間が勝負</strong>：今日(6/24)〜NIMS応募開始(7/1)の間に、筑波大の資格判定と（必要なら）事前確認メールを済ませる</li>
+      <li><strong>NIMS応募開始まで残り1日</strong>：今日(6/30)〜NIMS応募開始(7/1)直前。筑波大の資格判定と（必要なら）事前確認メールは本日中に済ませる</li>
+      <li><strong>【追加タスク・最重要】プレゼン資料は応募と並行で7/17(金)までに作成</strong>：書類選考通過後の面接で使うプレゼン資料は、選考結果(8月上旬)を待つと間に合わない。<a href="https://note.com/yukarikatsura/n/n56f57f00ac75" target="_blank">参考記事</a>を読み、<a href="Research_presentation_guide.pptx" download><strong>所定のテンプレ</strong></a>を使用して7/17までに作成・提出</li>
       <li><strong>NIMS書類審査(8月上旬)で不通過の場合</strong>：筑波大単独で受験は可能だがNIMS連携の特典は受けられない。判定結果を見て筑波出願の本気度を調整できる</li>
       <li><strong>要件(6)該当者の特殊事情</strong>：事前確認メールは出願資格審査(8/25)とは別物で、もっと早めに片付けるべき手続き。7月中に確認を取っておけば8月以降は出願書類準備に集中できる</li>
       <li><strong>英語スコアは応募締切必着</strong>：TOEIC/TOEFL/IELTSのスコア発行に2〜4週間かかるため、未受験なら最優先で受験予約</li>
@@ -788,6 +825,7 @@
     <ul style="margin:0; padding-left:20px;">
       <li><a href="https://www.ap-graduate.tsukuba.ac.jp/course/pas/first_all/" target="_blank">筑波大 数理物質科学研究群 入試情報</a></li>
       <li><a href="https://www.nims.go.jp/tsukuba/junior/" target="_blank">NIMSジュニア研究員制度</a></li>
+      <li><a href="https://note.com/yukarikatsura/n/n56f57f00ac75" target="_blank">プレゼン資料作成の参考記事（note・桂ゆかり氏）</a></li>
     </ul>
   </div>
 
