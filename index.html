@@ -21,14 +21,31 @@
     background: #f5f5f7; color: #333; font-size: 12px; border: 1px solid #d1d1d6;
   }
   .lang-btn.active { background: #007aff; color: white; border-color: #007aff; }
-  main { display: flex; flex-direction: column; gap: 12px; }
+  main { display: flex; flex-direction: column; gap: 14px; }
   .card {
     background: white; padding: 18px 20px; border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    display: flex; gap: 20px; align-items: flex-start;
   }
-  .card h2 {
-    font-size: 17px; margin: 0 0 6px 0;
+  .card-thumb {
+    flex: 0 0 260px;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid #e5e5e7;
+    background: #f5f5f7;
+    display: block;
   }
+  .card-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: top left;
+    display: block;
+    transition: transform 0.25s ease;
+  }
+  .card-thumb:hover img { transform: scale(1.03); }
+  .card-body { flex: 1; min-width: 0; }
+  .card h2 { font-size: 17px; margin: 0 0 6px 0; }
   .card h2 a { color: #1d1d1f; text-decoration: none; }
   .card h2 a:hover { color: #007aff; }
   .card .desc { color: #555; font-size: 14px; margin-bottom: 12px; }
@@ -50,6 +67,11 @@
     text-align: center;
   }
   footer a { color: #007aff; text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .card { flex-direction: column; gap: 14px; }
+    .card-thumb { flex: 0 0 auto; width: 100%; aspect-ratio: 16 / 9; }
+  }
 </style>
 </head>
 <body>
@@ -65,37 +87,54 @@
 <main>
 
   <div class="card">
-    <h2><a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/">NIMSジュニア勤務表ジェネレータ</a></h2>
-    <div class="desc">
-      NIMSジュニア研究員（Master 年132日 / Doctor 年168日）の年間勤務日をカレンダーで組み立て、学生にURL共有・メール送信で配布する管理ツール。事務職員向け。
-    </div>
-    <div class="links">
-      <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/" class="btn primary">管理画面を開く</a>
-      <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/" class="btn secondary">学生ビュー（要リンク）</a>
-      <a href="https://github.com/atsumitanaka/apps/blob/main/nims_junior_schedule/README.ja.md" class="btn secondary">README</a>
-    </div>
-    <div class="meta">複数学生タブ管理 / 週固定パターン + 調整月 / 祝日・お盆自動反映 / CSV出力 / JP・EN対応</div>
-  </div>
-
-  <div class="card">
-    <h2><a href="https://atsumitanaka.github.io/apps/kinmu_keisan.html">勤務時間計算ツール</a></h2>
-    <div class="desc">
-      SRKINMU の CSV を貼り付けて月次勤務時間を集計。標準勤務時間の変更、半休（AM=3:30 / PM=4:15）にも対応。フルタイム時のみ半休判定。
-    </div>
-    <div class="links">
-      <a href="https://atsumitanaka.github.io/apps/kinmu_keisan.html" class="btn primary">開く</a>
+    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/">
+      <img src="screenshots/nims_junior.png" alt="NIMSジュニア勤務表のカレンダー画面" loading="lazy">
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/">NIMSジュニア勤務表ジェネレータ</a></h2>
+      <div class="desc">
+        NIMSジュニア研究員（Master 年132日 / Doctor 年168日）の年間勤務日をカレンダーで組み立て、学生にURL共有・メール送信で配布する管理ツール。事務職員向け。週固定パターン + 調整月の自由設定 + 祝日・お盆の自動反映で、規定を満たすスケジュールを短時間で作成できます。
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/" class="btn primary">管理画面を開く</a>
+        <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/" class="btn secondary">学生ビュー（要リンク）</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/nims_junior_schedule/README.ja.md" class="btn secondary">README</a>
+      </div>
+      <div class="meta">複数学生タブ管理 / 週固定パターン + 調整月 / 祝日・お盆自動反映 / CSV出力 / JP・EN対応</div>
     </div>
   </div>
 
   <div class="card">
-    <h2><a href="https://atsumitanaka.github.io/apps/exam_schedule/">受験スケジュール（筑波大 IMI × NIMSジュニア）</a></h2>
-    <div class="desc">
-      2027年4月入学に向けた出願要件・スケジュール一覧。筑波大 国際マテリアルズイノベーション学位 (10月実施) と NIMSジュニア (7月公募) の併願用。
+    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/kinmu_keisan.html">
+      <img src="screenshots/kinmu_keisan.png" alt="勤務時間計算ツールの入力画面" loading="lazy">
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/kinmu_keisan.html">勤務時間計算ツール</a></h2>
+      <div class="desc">
+        SRKINMU からダウンロードした CSV をドラッグ&amp;ドロップするだけで月次の勤務時間を集計。標準勤務時間の変更、未承認休暇の追記、半休（AM=3:30 / PM=4:15、フルタイム時のみ）に対応。AI・API 不要、完全ブラウザ内処理。
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/kinmu_keisan.html" class="btn primary">開く</a>
+      </div>
+      <div class="meta">CSVドラッグ&amp;ドロップ / 標準勤務時間可変 / 半休対応 / ブラウザ完結</div>
     </div>
-    <div class="links">
-      <a href="https://atsumitanaka.github.io/apps/exam_schedule/" class="btn primary">開く (JA)</a>
-      <a href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html" class="btn secondary">Open (EN)</a>
-      <a href="https://github.com/atsumitanaka/apps/blob/main/exam_schedule/README.ja.md" class="btn secondary">README</a>
+  </div>
+
+  <div class="card">
+    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/exam_schedule/">
+      <img src="screenshots/exam_schedule.png" alt="受験スケジュール表と自己判定チェック" loading="lazy">
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/exam_schedule/">受験スケジュール（筑波大 IMI × NIMSジュニア）</a></h2>
+      <div class="desc">
+        2027年4月入学に向けた出願要件・スケジュール一覧。筑波大 国際マテリアルズイノベーション学位 (10月実施) と NIMSジュニア (7月公募) の併願用。出願資格の自己判定、必要書類、締切カウントダウンをまとめて確認できます。
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/exam_schedule/" class="btn primary">開く (JA)</a>
+        <a href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html" class="btn secondary">Open (EN)</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/exam_schedule/README.ja.md" class="btn secondary">README</a>
+      </div>
+      <div class="meta">出願資格チェック / 締切カウントダウン / 提出書類一覧 / JP・EN対応</div>
     </div>
   </div>
 

@@ -21,11 +21,30 @@
     background: #f5f5f7; color: #333; font-size: 12px; border: 1px solid #d1d1d6;
   }
   .lang-btn.active { background: #007aff; color: white; border-color: #007aff; }
-  main { display: flex; flex-direction: column; gap: 12px; }
+  main { display: flex; flex-direction: column; gap: 14px; }
   .card {
     background: white; padding: 18px 20px; border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    display: flex; gap: 20px; align-items: flex-start;
   }
+  .card-thumb {
+    flex: 0 0 260px;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid #e5e5e7;
+    background: #f5f5f7;
+    display: block;
+  }
+  .card-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    object-position: top left;
+    display: block;
+    transition: transform 0.25s ease;
+  }
+  .card-thumb:hover img { transform: scale(1.03); }
+  .card-body { flex: 1; min-width: 0; }
   .card h2 { font-size: 17px; margin: 0 0 6px 0; }
   .card h2 a { color: #1d1d1f; text-decoration: none; }
   .card h2 a:hover { color: #007aff; }
@@ -48,6 +67,11 @@
     text-align: center;
   }
   footer a { color: #007aff; text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .card { flex-direction: column; gap: 14px; }
+    .card-thumb { flex: 0 0 auto; width: 100%; aspect-ratio: 16 / 9; }
+  }
 </style>
 </head>
 <body>
@@ -63,37 +87,54 @@
 <main>
 
   <div class="card">
-    <h2><a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/index_en.html">NIMS Junior Work Schedule Generator</a></h2>
-    <div class="desc">
-      Build yearly work-day schedules for NIMS Junior researchers (Master 132/yr, Doctor 168/yr). The admin creates per-student calendars and distributes them via share link or email. Designed for office staff.
-    </div>
-    <div class="links">
-      <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/index_en.html" class="btn primary">Open admin</a>
-      <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/index_en.html" class="btn secondary">Student view (needs link)</a>
-      <a href="https://github.com/atsumitanaka/apps/blob/main/nims_junior_schedule/README.en.md" class="btn secondary">README</a>
-    </div>
-    <div class="meta">Multi-student tabs / fixed weekly pattern + adjustment months / auto holidays &amp; Obon / CSV export / JA + EN</div>
-  </div>
-
-  <div class="card">
-    <h2><a href="https://atsumitanaka.github.io/apps/kinmu_keisan.html">Work-hour calculator (JA)</a></h2>
-    <div class="desc">
-      Paste an SRKINMU CSV to tally monthly work hours. Supports configurable standard hours and half-day leave (AM = 3:30 / PM = 4:15, full-time only). Japanese UI only.
-    </div>
-    <div class="links">
-      <a href="https://atsumitanaka.github.io/apps/kinmu_keisan.html" class="btn primary">Open</a>
+    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/index_en.html">
+      <img src="screenshots/nims_junior.png" alt="NIMS Junior schedule calendar view" loading="lazy">
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/index_en.html">NIMS Junior Work Schedule Generator</a></h2>
+      <div class="desc">
+        Build yearly work-day schedules for NIMS Junior researchers (Master 132/yr, Doctor 168/yr). The admin creates per-student calendars and distributes them via share link or email. Fixed weekly patterns plus free-form adjustment months, with holidays and Obon auto-filled — a compliant schedule takes minutes.
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/index_en.html" class="btn primary">Open admin</a>
+        <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/index_en.html" class="btn secondary">Student view (needs link)</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/nims_junior_schedule/README.en.md" class="btn secondary">README</a>
+      </div>
+      <div class="meta">Multi-student tabs / fixed weekly pattern + adjustment months / auto holidays &amp; Obon / CSV export / JA + EN</div>
     </div>
   </div>
 
   <div class="card">
-    <h2><a href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html">Admission Schedule (Tsukuba IMI × NIMS Junior)</a></h2>
-    <div class="desc">
-      Application requirements and timeline for April 2027 enrollment: joint application for the University of Tsukuba International Materials Innovation (October exam) and NIMS Junior (July call).
+    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/kinmu_keisan.html">
+      <img src="screenshots/kinmu_keisan.png" alt="Work-hour calculator input screen" loading="lazy">
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/kinmu_keisan.html">Work-hour calculator (JA)</a></h2>
+      <div class="desc">
+        Drop an SRKINMU CSV to tally monthly work hours. Supports configurable standard hours, pending-leave adjustments, and half-day leave (AM = 3:30 / PM = 4:15, full-time only). No AI or API — everything runs in the browser. Japanese UI only.
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/kinmu_keisan.html" class="btn primary">Open</a>
+      </div>
+      <div class="meta">CSV drag &amp; drop / configurable standard hours / half-day support / fully client-side</div>
     </div>
-    <div class="links">
-      <a href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html" class="btn primary">Open (EN)</a>
-      <a href="https://atsumitanaka.github.io/apps/exam_schedule/" class="btn secondary">開く (JA)</a>
-      <a href="https://github.com/atsumitanaka/apps/blob/main/exam_schedule/README.en.md" class="btn secondary">README</a>
+  </div>
+
+  <div class="card">
+    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html">
+      <img src="screenshots/exam_schedule.png" alt="Admission schedule and eligibility check" loading="lazy">
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html">Admission Schedule (Tsukuba IMI × NIMS Junior)</a></h2>
+      <div class="desc">
+        Application requirements and timeline for April 2027 enrollment: joint application for the University of Tsukuba International Materials Innovation degree (October exam) and NIMS Junior (July call). Check eligibility, required documents, and deadline countdowns in one place.
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html" class="btn primary">Open (EN)</a>
+        <a href="https://atsumitanaka.github.io/apps/exam_schedule/" class="btn secondary">開く (JA)</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/exam_schedule/README.en.md" class="btn secondary">README</a>
+      </div>
+      <div class="meta">Eligibility self-check / deadline countdown / document checklist / JA + EN</div>
     </div>
   </div>
 
