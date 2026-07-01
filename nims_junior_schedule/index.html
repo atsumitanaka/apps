@@ -176,8 +176,8 @@ function getHolidays(year) {
   add(10, nthWeekdayDay(year, 10, 1, 2), 'スポーツの日');
   add(3, equinox(year, true), '春分の日');
   add(9, equinox(year, false), '秋分の日');
-  const orig = Object.assign({}, h);
-  for (const key of Object.keys(orig)) {
+  const baseKeys = Object.keys(h);
+  for (const key of baseKeys) {
     const [y, m, d] = key.split('-').map(Number);
     const date = new Date(y, m - 1, d);
     if (date.getDay() === 0) {
@@ -186,6 +186,18 @@ function getHolidays(year) {
       while (h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())]);
       h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())] = '振替休日';
     }
+  }
+  const baseSet = new Set(baseKeys);
+  for (const key of baseKeys) {
+    const [y, m, d] = key.split('-').map(Number);
+    const twoLater = new Date(y, m - 1, d + 2);
+    const tlKey = dateKey(twoLater.getFullYear(), twoLater.getMonth() + 1, twoLater.getDate());
+    if (!baseSet.has(tlKey)) continue;
+    const mid = new Date(y, m - 1, d + 1);
+    if (mid.getDay() === 0) continue;
+    const midKey = dateKey(mid.getFullYear(), mid.getMonth() + 1, mid.getDate());
+    if (h[midKey]) continue;
+    h[midKey] = '国民の休日';
   }
   return h;
 }
