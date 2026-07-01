@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>atsumitanaka / apps</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    margin: 0; padding: 20px 16px; background: #f5f5f7; color: #1d1d1f;
+    font-size: 15px; line-height: 1.5;
+    max-width: 900px; margin-left: auto; margin-right: auto;
+  }
+  header { margin-bottom: 24px; position: relative; }
+  h1 { font-size: 24px; margin: 0 0 4px 0; }
+  .subtitle { color: #666; font-size: 14px; }
+  .lang-switch { position: absolute; top: 4px; right: 0; display: flex; gap: 4px; }
+  .lang-btn {
+    text-decoration: none; padding: 4px 10px; border-radius: 4px;
+    background: #f5f5f7; color: #333; font-size: 12px; border: 1px solid #d1d1d6;
+  }
+  .lang-btn.active { background: #007aff; color: white; border-color: #007aff; }
+  main { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: white; padding: 18px 20px; border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .card h2 {
+    font-size: 17px; margin: 0 0 6px 0;
+  }
+  .card h2 a { color: #1d1d1f; text-decoration: none; }
+  .card h2 a:hover { color: #007aff; }
+  .card .desc { color: #555; font-size: 14px; margin-bottom: 12px; }
+  .card .links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .btn {
+    display: inline-block; padding: 6px 14px; border-radius: 6px;
+    text-decoration: none; font-size: 13px; font-weight: 600;
+    border: 1px solid #007aff;
+  }
+  .btn.primary { background: #007aff; color: white; }
+  .btn.primary:hover { background: #005ec4; }
+  .btn.secondary { background: white; color: #007aff; }
+  .btn.secondary:hover { background: #f0f7ff; }
+  .meta { font-size: 12px; color: #888; margin-top: 8px; }
+  .meta a { color: #007aff; text-decoration: none; }
+  footer {
+    margin-top: 32px; padding-top: 16px;
+    border-top: 1px solid #e5e5e7; color: #888; font-size: 12px;
+    text-align: center;
+  }
+  footer a { color: #007aff; text-decoration: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="lang-switch">
+    <a href="index.html" class="lang-btn active">JA</a>
+    <a href="index_en.html" class="lang-btn">EN</a>
+  </div>
+  <h1>atsumitanaka / apps</h1>
+  <div class="subtitle">業務・研究で使う小さなツール集</div>
+</header>
+
+<main>
+
+  <div class="card">
+    <h2><a href="nims_junior_schedule/admin/">NIMSジュニア勤務表ジェネレータ</a></h2>
+    <div class="desc">
+      NIMSジュニア研究員（Master 年132日 / Doctor 年168日）の年間勤務日をカレンダーで組み立て、学生にURL共有・メール送信で配布する管理ツール。事務職員向け。
+    </div>
+    <div class="links">
+      <a href="nims_junior_schedule/admin/" class="btn primary">管理画面を開く</a>
+      <a href="nims_junior_schedule/" class="btn secondary">学生ビュー（要リンク）</a>
+      <a href="nims_junior_schedule/README.ja.md" class="btn secondary">README</a>
+    </div>
+    <div class="meta">複数学生タブ管理 / 週固定パターン + 調整月 / 祝日・お盆自動反映 / CSV出力 / JP・EN対応</div>
+  </div>
+
+  <div class="card">
+    <h2><a href="kinmu_keisan.html">勤務時間計算ツール</a></h2>
+    <div class="desc">
+      SRKINMU の CSV を貼り付けて月次勤務時間を集計。標準勤務時間の変更、半休（AM=3:30 / PM=4:15）にも対応。フルタイム時のみ半休判定。
+    </div>
+    <div class="links">
+      <a href="kinmu_keisan.html" class="btn primary">開く</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><a href="exam_schedule/">受験スケジュール（筑波大 IMI × NIMSジュニア）</a></h2>
+    <div class="desc">
+      2027年4月入学に向けた出願要件・スケジュール一覧。筑波大 国際マテリアルズイノベーション学位 (10月実施) と NIMSジュニア (7月公募) の併願用。
+    </div>
+    <div class="links">
+      <a href="exam_schedule/" class="btn primary">開く (JA)</a>
+      <a href="exam_schedule/index_en.html" class="btn secondary">Open (EN)</a>
+      <a href="exam_schedule/README.ja.md" class="btn secondary">README</a>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Source: <a href="https://github.com/atsumitanaka/apps">github.com/atsumitanaka/apps</a>
+</footer>
+</body>
+</html>
