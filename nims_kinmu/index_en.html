@@ -105,6 +105,7 @@
   .cal-header.sat { color: #007aff; }
   .day {
     aspect-ratio: 1;
+    min-width: 0; overflow: hidden;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     border-radius: 4px; cursor: pointer;
@@ -140,7 +141,8 @@
   .day-num { font-weight: 600; font-size: 13px; line-height: 1; }
   .day-label {
     font-size: 8px; text-align: center; line-height: 1.1;
-    max-width: 95%; overflow: hidden; white-space: nowrap;
+    width: 100%; padding: 0 2px; box-sizing: border-box;
+    overflow: hidden; white-space: nowrap;
     text-overflow: ellipsis; margin-top: 1px;
     color: inherit;
   }
@@ -207,7 +209,7 @@
   <div class="legend">
     <div class="legend-item"><div class="legend-swatch" style="background:#007aff"></div>Work day</div>
     <div class="legend-item"><div class="legend-swatch" style="background:#fff8e1"></div>Adjustment period</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:#f3e5f5"></div>Summer leave (Obon)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#f3e5f5"></div>Summer (Obon)</div>
     <div class="legend-item"><div class="legend-swatch" style="background:white"></div>Off day</div>
     <div class="legend-item"><span style="color:#d70015;font-weight:700">!</span> 3-day/week rule violation</div>
   </div>
@@ -264,22 +266,22 @@ function equinox(year, spring) {
 function getHolidays(year) {
   const h = {};
   const add = (m, d, name) => h[dateKey(year, m, d)] = name;
-  add(1, 1, "New Year's Day");
-  add(2, 11, 'National Foundation Day');
-  add(2, 23, "Emperor's Birthday");
-  add(4, 29, 'Showa Day');
-  add(5, 3, 'Constitution Day');
-  add(5, 4, 'Greenery Day');
-  add(5, 5, "Children's Day");
-  add(8, 11, 'Mountain Day');
-  add(11, 3, 'Culture Day');
-  add(11, 23, 'Labor Thanksgiving');
+  add(1, 1, "New Year");
+  add(2, 11, 'Foundation');
+  add(2, 23, "Emperor");
+  add(4, 29, 'Showa');
+  add(5, 3, 'Constitution');
+  add(5, 4, 'Greenery');
+  add(5, 5, "Children");
+  add(8, 11, 'Mountain');
+  add(11, 3, 'Culture');
+  add(11, 23, 'Labor');
   add(1, nthWeekdayDay(year, 1, 1, 2), 'Coming of Age');
-  add(7, nthWeekdayDay(year, 7, 1, 3), 'Marine Day');
-  add(9, nthWeekdayDay(year, 9, 1, 3), 'Respect for the Aged');
-  add(10, nthWeekdayDay(year, 10, 1, 2), 'Sports Day');
-  add(3, equinox(year, true), 'Vernal Equinox');
-  add(9, equinox(year, false), 'Autumnal Equinox');
+  add(7, nthWeekdayDay(year, 7, 1, 3), 'Marine');
+  add(9, nthWeekdayDay(year, 9, 1, 3), 'Aged');
+  add(10, nthWeekdayDay(year, 10, 1, 2), 'Sports');
+  add(3, equinox(year, true), 'Vernal EQ');
+  add(9, equinox(year, false), 'Autumn EQ');
   const orig = Object.assign({}, h);
   for (const key of Object.keys(orig)) {
     const [y, m, d] = key.split('-').map(Number);
@@ -289,7 +291,7 @@ function getHolidays(year) {
       do {
         next.setDate(next.getDate() + 1);
       } while (h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())]);
-      h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())] = 'Substitute Holiday';
+      h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())] = 'Substitute';
     }
   }
   return h;
@@ -467,7 +469,7 @@ function renderCalendars() {
       num.className = 'day-num';
       num.textContent = d;
       cell.appendChild(num);
-      const labelText = holiday || (obon ? 'Summer leave' : '');
+      const labelText = holiday || (obon ? 'Summer' : '');
       if (labelText) {
         const lbl = document.createElement('div');
         lbl.className = 'day-label';
@@ -476,7 +478,7 @@ function renderCalendars() {
       }
       cell.title = `${dateKey(y, m, d)} (${WEEKDAY_LABELS[wd]})` +
         (holiday ? ` - ${holiday}` : '') +
-        (obon ? ' - Summer leave' : '') +
+        (obon ? ' - Summer' : '') +
         (adj ? ' [adjustment]' : '') +
         (work ? ' [work]' : '') +
         (violation ? ' [3-day/week rule violation]' : '');
