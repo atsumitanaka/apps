@@ -3,36 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NIMS Junior Work Schedule Generator</title>
+<title>NIMS Junior Work Schedule - Admin</title>
 <style>
   * { box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
-    margin: 0;
-    padding: 12px;
-    background: #f5f5f7;
-    color: #1d1d1f;
-    font-size: 14px;
+    margin: 0; padding: 12px; background: #f5f5f7; color: #1d1d1f; font-size: 14px;
   }
   header {
-    background: white;
-    padding: 14px 16px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    position: sticky;
-    top: 8px;
-    z-index: 100;
+    background: white; padding: 14px 16px; border-radius: 12px;
+    margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    position: sticky; top: 8px; z-index: 100;
   }
-  h1 { font-size: 17px; margin: 0 0 10px 0; padding-right: 140px; }
-  .controls {
-    display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center;
+  h1 { font-size: 17px; margin: 0 0 10px 0; padding-right: 130px; }
+  .lang-switch { position: absolute; top: 14px; right: 16px; display: flex; gap: 4px; }
+  .lang-btn {
+    text-decoration: none; padding: 3px 8px; border-radius: 4px;
+    background: #f5f5f7; color: #333; font-size: 12px; border: 1px solid #d1d1d6;
   }
-  .control-group {
-    display: flex; align-items: center; gap: 6px;
+  .lang-btn.active { background: #007aff; color: white; border-color: #007aff; }
+  .tabs {
+    display: flex; gap: 4px; margin-bottom: 10px; overflow-x: auto;
+    padding-bottom: 6px; -webkit-overflow-scrolling: touch;
   }
+  .tab {
+    padding: 6px 12px; background: #f0f0f0; border: 1px solid #d1d1d6;
+    border-radius: 16px; cursor: pointer; white-space: nowrap; font-size: 13px;
+    color: #333; font-family: inherit; flex-shrink: 0;
+  }
+  .tab:hover { background: #e0e0e0; }
+  .tab.active { background: #007aff; color: white; border-color: #007aff; }
+  .tab.add-tab { background: white; border-style: dashed; color: #007aff; }
+  .tab.add-tab:hover { background: #f0f7ff; }
+  .student-panel {
+    background: #f9f9fb; padding: 10px 12px; border-radius: 8px;
+    margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    border: 1px solid #eee;
+  }
+  .field-group { display: flex; align-items: center; gap: 6px; }
+  input[type="text"], input[type="email"] {
+    padding: 6px 8px; border: 1px solid #d1d1d6; border-radius: 6px;
+    font-size: 14px; background: white; font-family: inherit; min-width: 140px;
+  }
+  input[type="email"] { min-width: 200px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; }
+  .control-group { display: flex; align-items: center; gap: 6px; }
   label { font-weight: 600; font-size: 13px; }
-  select, input[type="number"] {
+  select {
     padding: 6px 8px; border: 1px solid #d1d1d6; border-radius: 6px;
     font-size: 14px; background: white;
   }
@@ -44,13 +61,14 @@
   button:hover { background: #005ec4; }
   button.secondary { background: white; color: #007aff; }
   button.secondary:hover { background: #f0f7ff; }
+  button.danger { background: white; color: #ff3b30; border-color: #ff3b30; }
+  button.danger:hover { background: #ffebee; }
   .weekday-picker { display: flex; gap: 4px; }
   .weekday-btn {
     width: 40px; height: 34px; padding: 0;
     display: flex; align-items: center; justify-content: center;
     border-radius: 6px; border: 1px solid #d1d1d6;
-    background: white; cursor: pointer; font-size: 12px;
-    color: #333;
+    background: white; cursor: pointer; font-size: 12px; color: #333;
   }
   .weekday-btn[data-day="0"] { color: #d70015; }
   .weekday-btn[data-day="6"] { color: #007aff; }
@@ -58,8 +76,8 @@
     background: #007aff !important; color: white !important; border-color: #007aff;
   }
   .summary {
-    padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px;
-    background: #f0f9ff;
+    padding: 6px 12px; border-radius: 6px; font-weight: 600;
+    font-size: 13px; background: #f0f9ff;
   }
   .summary.ok { background: #d4f8d4; color: #155724; }
   .summary.warn { background: #fff3cd; color: #856404; }
@@ -70,99 +88,63 @@
     border-radius: 6px; color: #555;
   }
   .legend-item { display: flex; align-items: center; gap: 4px; }
-  .legend-swatch {
-    width: 14px; height: 14px; border-radius: 3px; border: 1px solid #ddd;
-  }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #ddd; }
+  .hint { font-size: 12px; color: #666; margin-top: 6px; }
   main {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-    gap: 10px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 10px;
   }
   .month {
     background: white; border-radius: 10px; padding: 10px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   }
-  .month-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 6px;
-  }
+  .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .month-name { font-size: 15px; font-weight: 700; }
-  .month-count {
-    font-size: 12px; padding: 2px 8px; border-radius: 10px;
-    background: #f5f5f7; font-weight: 600;
-  }
+  .month-count { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #f5f5f7; font-weight: 600; }
   .month-count.ok { background: #d4f8d4; color: #155724; }
   .month-count.warn { background: #fff3cd; color: #856404; }
   .month-count.error { background: #f8d7da; color: #721c24; }
-  .calendar {
-    display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
-  }
-  .cal-header {
-    text-align: center; font-size: 11px; font-weight: 600;
-    padding: 3px 0; color: #666;
-  }
+  .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-header { text-align: center; font-size: 11px; font-weight: 600; padding: 3px 0; color: #666; }
   .cal-header.sun { color: #d70015; }
   .cal-header.sat { color: #007aff; }
   .day {
-    aspect-ratio: 1;
-    min-width: 0; overflow: hidden;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    border-radius: 4px; cursor: pointer;
-    font-size: 12px; position: relative;
+    aspect-ratio: 1; min-width: 0; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 4px; cursor: pointer; font-size: 12px; position: relative;
     background: white; border: 1px solid #eee;
-    user-select: none;
-    transition: transform 0.05s;
+    user-select: none; transition: transform 0.05s;
   }
   .day:hover:not(.empty) { transform: scale(1.05); z-index: 1; }
-  .day.empty {
-    background: transparent; border: none; cursor: default;
-  }
+  .day.empty { background: transparent; border: none; cursor: default; }
   .day.adjustment { background: #fff8e1; border-color: #f7e6a2; }
   .day.obon { background: #f3e5f5; border-color: #d1a3d9; }
-  .day.work {
-    background: #007aff; color: white; border-color: #007aff;
-  }
+  .day.work { background: #007aff; color: white; border-color: #007aff; }
   .day.weekend-sun { color: #d70015; }
   .day.weekend-sat { color: #007aff; }
   .day.holiday { color: #d70015; }
   .day.obon:not(.work) { color: #6a1b9a; }
-  .day.work .day-num,
-  .day.work .day-label { color: white; }
+  .day.work .day-num, .day.work .day-label { color: white; }
   .day.violation { box-shadow: inset 0 0 0 2px #d70015; }
   .day.violation::after {
     content: "!"; position: absolute; top: -2px; right: 3px;
     color: #d70015; font-weight: 700; font-size: 11px;
     background: white; border-radius: 50%;
     width: 12px; height: 12px;
-    display: flex; align-items: center; justify-content: center;
-    line-height: 1;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
   }
   .day-num { font-weight: 600; font-size: 13px; line-height: 1; }
   .day-label {
     font-size: 8px; text-align: center; line-height: 1.1;
     width: 100%; padding: 0 2px; box-sizing: border-box;
-    overflow: hidden; white-space: nowrap;
-    text-overflow: ellipsis; margin-top: 1px;
-    color: inherit;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    margin-top: 1px; color: inherit;
   }
-  .hint {
-    font-size: 12px; color: #666; margin-top: 6px;
-  }
-  .lang-switch {
-    position: absolute; top: 14px; right: 16px;
-    display: flex; gap: 4px;
-  }
-  .lang-btn {
-    text-decoration: none; padding: 3px 8px; border-radius: 4px;
-    background: #f5f5f7; color: #333; font-size: 12px;
-    border: 1px solid #d1d1d6;
-  }
-  .lang-btn.active { background: #007aff; color: white; border-color: #007aff; }
   @media (max-width: 640px) {
     body { padding: 6px; font-size: 13px; }
     header { position: static; padding: 12px; }
-    .controls { gap: 8px 12px; }
+    .controls, .student-panel { gap: 8px 12px; }
+    input[type="text"], input[type="email"] { min-width: 100%; }
+    .field-group { flex: 1 1 auto; }
     main { grid-template-columns: 1fr; }
     .month { padding: 8px; }
   }
@@ -174,13 +156,29 @@
     <a href="index.html" class="lang-btn">JA</a>
     <a href="index_en.html" class="lang-btn active">EN</a>
   </div>
-  <h1>NIMS Junior Work Schedule Generator</h1>
+  <h1>NIMS Junior Work Schedule - Admin</h1>
+  <div class="tabs" id="tabs"></div>
+  <div class="student-panel">
+    <div class="field-group">
+      <label>Name</label>
+      <input type="text" id="studentName" placeholder="Full name">
+    </div>
+    <div class="field-group">
+      <label>Email</label>
+      <input type="email" id="studentEmail" placeholder="student@example.com">
+    </div>
+    <div class="field-group">
+      <button id="copyLinkBtn" class="secondary">Copy link</button>
+      <button id="sendEmailBtn">Send email</button>
+      <button id="deleteBtn" class="danger">Delete student</button>
+    </div>
+  </div>
   <div class="controls">
     <div class="control-group">
       <label>Program</label>
       <select id="program">
-        <option value="master">Master (11 days/mo, 132 days/yr)</option>
-        <option value="doctor">Doctor (14 days/mo, 168 days/yr)</option>
+        <option value="master">Master (11 days/mo, 132/yr)</option>
+        <option value="doctor">Doctor (14 days/mo, 168/yr)</option>
       </select>
     </div>
     <div class="control-group">
@@ -213,7 +211,7 @@
     <div class="legend-item"><div class="legend-swatch" style="background:white"></div>Off day</div>
     <div class="legend-item"><span style="color:#d70015;font-weight:700">!</span> 3-day/week rule violation</div>
   </div>
-  <div class="hint">Base weekly pattern applies year-round. Click a day to toggle work/off. Adjustment periods and summer leave can be freely edited without violation warnings.</div>
+  <div class="hint">Add a student, set name/email/calendar, then send via email or copy the share link. Click any day to toggle work/off.</div>
 </header>
 <main id="calendars"></main>
 
@@ -229,24 +227,56 @@ const TARGETS = {
 const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const STORAGE_KEY = 'nims_kinmu_v1';
+const STORAGE_KEY = 'nims_junior_admin_v1';
+const LEGACY_KEY = 'nims_kinmu_v1';
 
-let state = {
-  program: 'master',
-  startYear: 2026,
-  startMonth: 4,
-  pattern: [1, 3, 5],
-  overrides: {},
-};
+let state = { students: [], activeStudentId: null };
+
+function newId() {
+  return (crypto.randomUUID && crypto.randomUUID()) ||
+    (String(Date.now()) + Math.random().toString(36).slice(2, 8));
+}
+function defaultStudent(name) {
+  return {
+    id: newId(), name: name || '', email: '',
+    program: 'master', startYear: 2026, startMonth: 4,
+    pattern: [1, 3, 5], overrides: {},
+  };
+}
 
 function saveState() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
 }
 function loadState() {
   try {
-    const s = localStorage.getItem(STORAGE_KEY);
-    if (s) state = Object.assign(state, JSON.parse(s));
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { const p = JSON.parse(raw); if (p.students) state = p; }
   } catch(e) {}
+  if (state.students.length === 0) {
+    try {
+      const legacy = localStorage.getItem(LEGACY_KEY);
+      if (legacy) {
+        const o = JSON.parse(legacy);
+        const s = defaultStudent('');
+        Object.assign(s, {
+          program: o.program || 'master',
+          startYear: o.startYear || 2026,
+          startMonth: o.startMonth || 4,
+          pattern: o.pattern || [1, 3, 5],
+          overrides: o.overrides || {},
+        });
+        state.students = [s];
+      }
+    } catch(e) {}
+  }
+  if (state.students.length === 0) state.students = [defaultStudent('')];
+  if (!state.activeStudentId || !state.students.find(s => s.id === state.activeStudentId)) {
+    state.activeStudentId = state.students[0].id;
+  }
+}
+
+function activeStudent() {
+  return state.students.find(s => s.id === state.activeStudentId) || state.students[0];
 }
 
 const pad = n => String(n).padStart(2, '0');
@@ -255,8 +285,7 @@ const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
 
 function nthWeekdayDay(year, month, weekday, n) {
   const first = new Date(year, month - 1, 1);
-  const firstWd = first.getDay();
-  return 1 + ((weekday - firstWd + 7) % 7) + (n - 1) * 7;
+  return 1 + ((weekday - first.getDay() + 7) % 7) + (n - 1) * 7;
 }
 function equinox(year, spring) {
   const d = year - 1980;
@@ -266,15 +295,9 @@ function equinox(year, spring) {
 function getHolidays(year) {
   const h = {};
   const add = (m, d, name) => h[dateKey(year, m, d)] = name;
-  add(1, 1, "New Year");
-  add(2, 11, 'Foundation');
-  add(2, 23, "Emperor");
-  add(4, 29, 'Showa');
-  add(5, 3, 'Constitution');
-  add(5, 4, 'Greenery');
-  add(5, 5, "Children");
-  add(8, 11, 'Mountain');
-  add(11, 3, 'Culture');
+  add(1, 1, 'New Year'); add(2, 11, 'Foundation'); add(2, 23, 'Emperor');
+  add(4, 29, 'Showa'); add(5, 3, 'Constitution'); add(5, 4, 'Greenery');
+  add(5, 5, 'Children'); add(8, 11, 'Mountain'); add(11, 3, 'Culture');
   add(11, 23, 'Labor');
   add(1, nthWeekdayDay(year, 1, 1, 2), 'Coming of Age');
   add(7, nthWeekdayDay(year, 7, 1, 3), 'Marine');
@@ -288,9 +311,8 @@ function getHolidays(year) {
     const date = new Date(y, m - 1, d);
     if (date.getDay() === 0) {
       let next = new Date(date);
-      do {
-        next.setDate(next.getDate() + 1);
-      } while (h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())]);
+      do { next.setDate(next.getDate() + 1); }
+      while (h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())]);
       h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())] = 'Substitute';
     }
   }
@@ -301,32 +323,24 @@ function isHoliday(y, m, d) {
   if (!holidayCache[y]) holidayCache[y] = getHolidays(y);
   return holidayCache[y][dateKey(y, m, d)];
 }
-
 function isAdjustmentDay(y, m, d) {
   if (ADJUSTMENT_MONTHS.includes(m)) return true;
   const base = new Date(y, m - 1, d);
-  for (let offset = -BUFFER_DAYS; offset <= BUFFER_DAYS; offset++) {
-    const c = new Date(base);
-    c.setDate(c.getDate() + offset);
+  for (let off = -BUFFER_DAYS; off <= BUFFER_DAYS; off++) {
+    const c = new Date(base); c.setDate(c.getDate() + off);
     if (ADJUSTMENT_MONTHS.includes(c.getMonth() + 1)) return true;
   }
   return false;
 }
-
-// NIMS recommended summer leave: core Aug 13-16, excluding weekends and holidays.
-// If fewer than 4 weekdays, extend backwards from Aug 12.
 function getObonDays(year) {
   const isCandidate = d => {
-    const date = new Date(year, 7, d);
-    const wd = date.getDay();
+    const wd = new Date(year, 7, d).getDay();
     if (wd === 0 || wd === 6) return false;
     if (isHoliday(year, 8, d)) return false;
     return true;
   };
   const days = [];
-  for (let d = 13; d <= 16; d++) {
-    if (isCandidate(d)) days.push(d);
-  }
+  for (let d = 13; d <= 16; d++) if (isCandidate(d)) days.push(d);
   let cur = 12;
   while (days.length < 4 && cur >= 1) {
     if (isCandidate(cur)) days.unshift(cur);
@@ -342,30 +356,25 @@ function isObon(y, m, d) {
 }
 
 function isDefaultWork(y, m, d) {
-  const date = new Date(y, m - 1, d);
-  const wd = date.getDay();
+  const s = activeStudent();
+  const wd = new Date(y, m - 1, d).getDay();
   if (isHoliday(y, m, d)) return false;
   if (isObon(y, m, d)) return false;
-  return state.pattern.includes(wd);
+  return s.pattern.includes(wd);
 }
 function isWorkDay(y, m, d) {
+  const s = activeStudent();
   const key = dateKey(y, m, d);
-  if (key in state.overrides) return state.overrides[key];
+  if (key in s.overrides) return s.overrides[key];
   return isDefaultWork(y, m, d);
 }
-
-// "Exactly 3 in any 7 consecutive days" check.
-// Applied only to 7-day windows fully outside adjustment/holiday/obon days.
 function checkViolation(y, m, d) {
   const base = new Date(y, m - 1, d);
-  for (let startOffset = -6; startOffset <= 0; startOffset++) {
-    const start = new Date(base);
-    start.setDate(start.getDate() + startOffset);
-    let checkable = true;
-    let count = 0;
+  for (let so = -6; so <= 0; so++) {
+    const start = new Date(base); start.setDate(start.getDate() + so);
+    let checkable = true, count = 0;
     for (let i = 0; i < 7; i++) {
-      const c = new Date(start);
-      c.setDate(c.getDate() + i);
+      const c = new Date(start); c.setDate(c.getDate() + i);
       const cy = c.getFullYear(), cm = c.getMonth() + 1, cd = c.getDate();
       if (isAdjustmentDay(cy, cm, cd) || isHoliday(cy, cm, cd) || isObon(cy, cm, cd)) {
         checkable = false; break;
@@ -376,30 +385,66 @@ function checkViolation(y, m, d) {
   }
   return false;
 }
-
 function iterateMonths(cb) {
+  const s = activeStudent();
   for (let i = 0; i < 12; i++) {
-    let y = state.startYear;
-    let m = state.startMonth + i;
+    let y = s.startYear, m = s.startMonth + i;
     while (m > 12) { m -= 12; y++; }
     cb(y, m, i);
   }
 }
 
-function render() {
-  updateControls();
-  renderCalendars();
-  updateAnnualSummary();
-  saveState();
+function encodeStudent(s) {
+  const compact = { n: s.name, p: s.program, w: s.pattern, y: s.startYear, m: s.startMonth, o: s.overrides };
+  return btoa(unescape(encodeURIComponent(JSON.stringify(compact))));
+}
+function buildShareUrl(s, lang) {
+  const parentPath = location.pathname.replace(/admin\/[^/]*$/, '').replace(/admin\/$/, '');
+  const file = lang === 'en' ? 'index_en.html' : '';
+  return location.origin + parentPath + file + '#s=' + encodeStudent(s);
 }
 
-function updateControls() {
-  document.getElementById('program').value = state.program;
-  document.getElementById('startYear').value = state.startYear;
-  document.getElementById('startMonth').value = state.startMonth;
+function render() {
+  renderTabs(); renderPanel(); renderControls();
+  renderCalendars(); updateAnnualSummary(); saveState();
+}
+
+function renderTabs() {
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  state.students.forEach(s => {
+    const t = document.createElement('button');
+    t.className = 'tab' + (s.id === state.activeStudentId ? ' active' : '');
+    t.textContent = s.name || '(unnamed)';
+    t.addEventListener('click', () => { state.activeStudentId = s.id; render(); });
+    tabsEl.appendChild(t);
+  });
+  const add = document.createElement('button');
+  add.className = 'tab add-tab';
+  add.textContent = '+ Add student';
+  add.addEventListener('click', () => {
+    const s = defaultStudent('');
+    state.students.push(s);
+    state.activeStudentId = s.id;
+    render();
+    setTimeout(() => document.getElementById('studentName').focus(), 0);
+  });
+  tabsEl.appendChild(add);
+}
+
+function renderPanel() {
+  const s = activeStudent();
+  document.getElementById('studentName').value = s.name;
+  document.getElementById('studentEmail').value = s.email;
+}
+function renderControls() {
+  const s = activeStudent();
+  document.getElementById('program').value = s.program;
+  document.getElementById('startYear').value = s.startYear;
+  document.getElementById('startMonth').value = s.startMonth;
   document.querySelectorAll('.weekday-btn').forEach(btn => {
     const d = Number(btn.dataset.day);
-    btn.classList.toggle('selected', state.pattern.includes(d));
+    btn.classList.toggle('selected', s.pattern.includes(d));
   });
 }
 
@@ -408,26 +453,22 @@ function renderCalendars() {
   for (const k in obonCache) delete obonCache[k];
   const container = document.getElementById('calendars');
   container.innerHTML = '';
-  const target = TARGETS[state.program];
+  const s = activeStudent();
+  const target = TARGETS[s.program];
 
   iterateMonths((y, m) => {
     const monthDiv = document.createElement('div');
     monthDiv.className = 'month';
     const dim = daysInMonth(y, m);
     let count = 0;
-    for (let d = 1; d <= dim; d++) {
-      if (isWorkDay(y, m, d)) count++;
-    }
-    let countClass = 'ok';
+    for (let d = 1; d <= dim; d++) if (isWorkDay(y, m, d)) count++;
     const diff = Math.abs(count - target.monthly);
-    if (diff === 0) countClass = 'ok';
-    else if (diff <= 2) countClass = 'warn';
-    else countClass = 'error';
+    let cls = diff === 0 ? 'ok' : (diff <= 2 ? 'warn' : 'error');
 
     const header = document.createElement('div');
     header.className = 'month-header';
     header.innerHTML = `<div class="month-name">${MONTH_NAMES[m - 1]} ${y}</div>
-      <div class="month-count ${countClass}">${count} / ${target.monthly} days</div>`;
+      <div class="month-count ${cls}">${count} / ${target.monthly} days</div>`;
     monthDiv.appendChild(header);
 
     const cal = document.createElement('div');
@@ -442,9 +483,8 @@ function renderCalendars() {
     }
     const first = new Date(y, m - 1, 1);
     for (let i = 0; i < first.getDay(); i++) {
-      const empty = document.createElement('div');
-      empty.className = 'day empty';
-      cal.appendChild(empty);
+      const e = document.createElement('div'); e.className = 'day empty';
+      cal.appendChild(e);
     }
     for (let d = 1; d <= dim; d++) {
       const date = new Date(y, m - 1, d);
@@ -466,22 +506,18 @@ function renderCalendars() {
       if (violation) cell.classList.add('violation');
 
       const num = document.createElement('div');
-      num.className = 'day-num';
-      num.textContent = d;
+      num.className = 'day-num'; num.textContent = d;
       cell.appendChild(num);
       const labelText = holiday || (obon ? 'Summer' : '');
       if (labelText) {
         const lbl = document.createElement('div');
-        lbl.className = 'day-label';
-        lbl.textContent = labelText;
+        lbl.className = 'day-label'; lbl.textContent = labelText;
         cell.appendChild(lbl);
       }
       cell.title = `${dateKey(y, m, d)} (${WEEKDAY_LABELS[wd]})` +
-        (holiday ? ` - ${holiday}` : '') +
-        (obon ? ' - Summer' : '') +
-        (adj ? ' [adjustment]' : '') +
-        (work ? ' [work]' : '') +
-        (violation ? ' [3-day/week rule violation]' : '');
+        (holiday ? ` - ${holiday}` : '') + (obon ? ' - Summer leave' : '') +
+        (adj ? ' [adjustment]' : '') + (work ? ' [work]' : '') +
+        (violation ? ' [violation]' : '');
       cell.addEventListener('click', () => toggleDay(y, m, d));
       cal.appendChild(cell);
     }
@@ -491,17 +527,19 @@ function renderCalendars() {
 }
 
 function toggleDay(y, m, d) {
+  const s = activeStudent();
   const key = dateKey(y, m, d);
   const current = isWorkDay(y, m, d);
   const isDef = isDefaultWork(y, m, d);
   const newVal = !current;
-  if (newVal === isDef) delete state.overrides[key];
-  else state.overrides[key] = newVal;
+  if (newVal === isDef) delete s.overrides[key];
+  else s.overrides[key] = newVal;
   render();
 }
 
 function updateAnnualSummary() {
-  const target = TARGETS[state.program];
+  const s = activeStudent();
+  const target = TARGETS[s.program];
   let count = 0, adjCount = 0, nonAdjCount = 0;
   iterateMonths((y, m) => {
     const dim = daysInMonth(y, m);
@@ -523,13 +561,16 @@ function updateAnnualSummary() {
   else el.classList.add('error');
 }
 
+function slugify(name) {
+  return (name || 'student').replace(/[\s\/\\<>:"|?*]+/g, '_').slice(0, 30);
+}
 function exportCSV() {
+  const s = activeStudent();
   const rows = [['Date', 'Weekday', 'Work', 'Adjustment', 'Note']];
   iterateMonths((y, m) => {
     const dim = daysInMonth(y, m);
     for (let d = 1; d <= dim; d++) {
-      const date = new Date(y, m - 1, d);
-      const wd = WEEKDAY_LABELS[date.getDay()];
+      const wd = WEEKDAY_LABELS[new Date(y, m - 1, d).getDay()];
       const work = isWorkDay(y, m, d);
       const adj = isAdjustmentDay(y, m, d);
       const note = isHoliday(y, m, d) || (isObon(y, m, d) ? 'Summer leave' : '');
@@ -541,59 +582,103 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `nims_kinmu_${state.startYear}-${pad(state.startMonth)}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.download = `nims_junior_${slugify(s.name)}_${s.startYear}-${pad(s.startMonth)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
+async function copyShareLink() {
+  const s = activeStudent();
+  if (!s.name.trim()) { alert('Please enter the student name.'); return; }
+  const url = buildShareUrl(s, 'en');
+  try {
+    await navigator.clipboard.writeText(url);
+    alert('Link copied to clipboard:\n' + url);
+  } catch(e) {
+    prompt('Copy this link:', url);
+  }
+}
+
+function sendEmail() {
+  const s = activeStudent();
+  if (!s.name.trim()) { alert('Please enter the student name.'); return; }
+  if (!s.email.trim()) { alert('Please enter the email address.'); return; }
+  const url = buildShareUrl(s, 'en');
+  const subject = `NIMS Junior work schedule: ${s.name}`;
+  const body =
+`Dear ${s.name},
+
+Your NIMS Junior work schedule has been prepared.
+You can view it on any PC or smartphone from the link below.
+
+${url}
+
+The link opens a calendar view and lets you export the schedule as CSV.
+
+Best regards,
+NIMS Junior Office`;
+  location.href = `mailto:${encodeURIComponent(s.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function deleteStudent() {
+  const s = activeStudent();
+  if (!confirm(`Delete "${s.name || '(unnamed)'}"? This cannot be undone.`)) return;
+  state.students = state.students.filter(x => x.id !== s.id);
+  if (state.students.length === 0) state.students = [defaultStudent('')];
+  state.activeStudentId = state.students[0].id;
+  render();
+}
+
 function initEvents() {
+  document.getElementById('studentName').addEventListener('input', e => {
+    activeStudent().name = e.target.value; renderTabs(); saveState();
+  });
+  document.getElementById('studentEmail').addEventListener('input', e => {
+    activeStudent().email = e.target.value; saveState();
+  });
   document.getElementById('program').addEventListener('change', e => {
-    state.program = e.target.value;
-    render();
+    activeStudent().program = e.target.value; render();
   });
   const ySel = document.getElementById('startYear');
   for (let y = 2024; y <= 2035; y++) {
-    const opt = document.createElement('option');
-    opt.value = y; opt.textContent = y;
-    ySel.appendChild(opt);
+    const o = document.createElement('option'); o.value = y; o.textContent = y;
+    ySel.appendChild(o);
   }
   ySel.addEventListener('change', e => {
-    state.startYear = Number(e.target.value);
-    render();
+    activeStudent().startYear = Number(e.target.value); render();
   });
   const mSel = document.getElementById('startMonth');
   for (let m = 1; m <= 12; m++) {
-    const opt = document.createElement('option');
-    opt.value = m; opt.textContent = MONTH_NAMES[m - 1];
-    mSel.appendChild(opt);
+    const o = document.createElement('option'); o.value = m; o.textContent = MONTH_NAMES[m - 1];
+    mSel.appendChild(o);
   }
   mSel.addEventListener('change', e => {
-    state.startMonth = Number(e.target.value);
-    render();
+    activeStudent().startMonth = Number(e.target.value); render();
   });
   document.querySelectorAll('.weekday-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      const s = activeStudent();
       const d = Number(btn.dataset.day);
-      const idx = state.pattern.indexOf(d);
-      if (idx >= 0) {
-        state.pattern.splice(idx, 1);
-      } else {
-        if (state.pattern.length >= 3) state.pattern.shift();
-        state.pattern.push(d);
+      const idx = s.pattern.indexOf(d);
+      if (idx >= 0) s.pattern.splice(idx, 1);
+      else {
+        if (s.pattern.length >= 3) s.pattern.shift();
+        s.pattern.push(d);
       }
-      state.pattern.sort((a, b) => a - b);
+      s.pattern.sort((a, b) => a - b);
       render();
     });
   });
   document.getElementById('resetBtn').addEventListener('click', () => {
-    if (confirm('Reset all manual edits back to the default pattern?')) {
-      state.overrides = {};
-      render();
+    const s = activeStudent();
+    if (confirm(`Reset all manual edits for "${s.name || '(unnamed)'}"?`)) {
+      s.overrides = {}; render();
     }
   });
   document.getElementById('exportBtn').addEventListener('click', exportCSV);
+  document.getElementById('copyLinkBtn').addEventListener('click', copyShareLink);
+  document.getElementById('sendEmailBtn').addEventListener('click', sendEmail);
+  document.getElementById('deleteBtn').addEventListener('click', deleteStudent);
 }
 
 loadState();

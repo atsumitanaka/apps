@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NIMSジュニア勤務表</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    margin: 0; padding: 12px; background: #f5f5f7; color: #1d1d1f; font-size: 14px;
+  }
+  header {
+    background: white; padding: 14px 16px; border-radius: 12px;
+    margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  h1 { font-size: 17px; margin: 0 0 10px 0; padding-right: 100px; }
+  .lang-switch { position: absolute; top: 14px; right: 16px; display: flex; gap: 4px; }
+  .lang-btn {
+    text-decoration: none; padding: 3px 8px; border-radius: 4px;
+    background: #f5f5f7; color: #333; font-size: 12px; border: 1px solid #d1d1d6;
+  }
+  .lang-btn.active { background: #007aff; color: white; border-color: #007aff; }
+  .info-panel {
+    display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center;
+    padding: 10px 12px; background: #f9f9fb; border-radius: 8px;
+    margin-bottom: 10px; font-size: 13px;
+  }
+  .info-panel .name { font-weight: 700; font-size: 15px; }
+  .info-panel .meta { color: #555; }
+  .actions {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px;
+  }
+  button {
+    padding: 6px 12px; border: 1px solid #007aff; background: #007aff;
+    color: white; border-radius: 6px; cursor: pointer; font-size: 13px;
+    font-family: inherit;
+  }
+  button:hover { background: #005ec4; }
+  .summary {
+    padding: 6px 12px; border-radius: 6px; font-weight: 600;
+    font-size: 13px; background: #f0f9ff;
+  }
+  .summary.ok { background: #d4f8d4; color: #155724; }
+  .summary.warn { background: #fff3cd; color: #856404; }
+  .summary.error { background: #f8d7da; color: #721c24; }
+  .legend {
+    display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px;
+    font-size: 12px; padding: 8px 12px; background: #fafafa;
+    border-radius: 6px; color: #555;
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-swatch { width: 14px; height: 14px; border-radius: 3px; border: 1px solid #ddd; }
+  .no-data {
+    padding: 40px 20px; text-align: center; color: #555;
+  }
+  .no-data a { color: #007aff; text-decoration: none; }
+  main {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 10px;
+  }
+  .month {
+    background: white; border-radius: 10px; padding: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .month-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .month-name { font-size: 15px; font-weight: 700; }
+  .month-count { font-size: 12px; padding: 2px 8px; border-radius: 10px; background: #f5f5f7; font-weight: 600; }
+  .month-count.ok { background: #d4f8d4; color: #155724; }
+  .month-count.warn { background: #fff3cd; color: #856404; }
+  .month-count.error { background: #f8d7da; color: #721c24; }
+  .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-header { text-align: center; font-size: 11px; font-weight: 600; padding: 3px 0; color: #666; }
+  .cal-header.sun { color: #d70015; }
+  .cal-header.sat { color: #007aff; }
+  .day {
+    aspect-ratio: 1; min-width: 0; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border-radius: 4px; cursor: default; font-size: 12px; position: relative;
+    background: white; border: 1px solid #eee;
+    user-select: none;
+  }
+  .day.empty { background: transparent; border: none; }
+  .day.adjustment { background: #fff8e1; border-color: #f7e6a2; }
+  .day.obon { background: #f3e5f5; border-color: #d1a3d9; }
+  .day.work { background: #007aff; color: white; border-color: #007aff; }
+  .day.weekend-sun { color: #d70015; }
+  .day.weekend-sat { color: #007aff; }
+  .day.holiday { color: #d70015; }
+  .day.obon:not(.work) { color: #6a1b9a; }
+  .day.work .day-num, .day.work .day-label { color: white; }
+  .day-num { font-weight: 600; font-size: 13px; line-height: 1; }
+  .day-label {
+    font-size: 8px; text-align: center; line-height: 1.1;
+    width: 100%; padding: 0 2px; box-sizing: border-box;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+    margin-top: 1px; color: inherit;
+  }
+  @media (max-width: 640px) {
+    body { padding: 6px; font-size: 13px; }
+    header { padding: 12px; }
+    main { grid-template-columns: 1fr; }
+    .month { padding: 8px; }
+  }
+</style>
+</head>
+<body>
+<header style="position:relative">
+  <div class="lang-switch">
+    <a href="index.html" class="lang-btn active">JA</a>
+    <a id="enLink" href="index_en.html" class="lang-btn">EN</a>
+  </div>
+  <h1 id="pageTitle">NIMSジュニア勤務表</h1>
+  <div id="noData" class="no-data" style="display:none">
+    <p>共有リンクからアクセスしてください。</p>
+    <p>URLに <code>#s=...</code> が含まれる形式のリンクを事務局から受け取ってお使いください。</p>
+    <p style="margin-top:20px"><a href="admin/">管理画面 →</a></p>
+  </div>
+  <div id="dataView" style="display:none">
+    <div class="info-panel">
+      <div class="name" id="viewName"></div>
+      <div class="meta" id="viewProgram"></div>
+      <div class="meta" id="viewStart"></div>
+      <div class="meta" id="viewPattern"></div>
+    </div>
+    <div class="actions">
+      <button id="exportBtn">CSV出力</button>
+      <div class="summary" id="annualSummary"></div>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-swatch" style="background:#007aff"></div>勤務日</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fff8e1"></div>調整期間</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#f3e5f5"></div>夏季休暇(お盆)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:white"></div>非勤務日</div>
+    </div>
+  </div>
+</header>
+<main id="calendars"></main>
+
+<script>
+'use strict';
+
+const ADJUSTMENT_MONTHS = [2, 3, 8, 9];
+const BUFFER_DAYS = 7;
+const TARGETS = {
+  master: { monthly: 11, annual: 132 },
+  doctor: { monthly: 14, annual: 168 },
+};
+const WEEKDAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
+const PROGRAM_LABELS = { master: 'Master (月11日 / 年132日)', doctor: 'Doctor (月14日 / 年168日)' };
+
+let student = null;
+
+const pad = n => String(n).padStart(2, '0');
+const dateKey = (y, m, d) => `${y}-${pad(m)}-${pad(d)}`;
+const daysInMonth = (y, m) => new Date(y, m, 0).getDate();
+
+function nthWeekdayDay(year, month, weekday, n) {
+  const first = new Date(year, month - 1, 1);
+  return 1 + ((weekday - first.getDay() + 7) % 7) + (n - 1) * 7;
+}
+function equinox(year, spring) {
+  const d = year - 1980;
+  const base = spring ? 20.8431 : 23.2488;
+  return Math.floor(base + 0.242194 * d - Math.floor(d / 4));
+}
+function getHolidays(year) {
+  const h = {};
+  const add = (m, d, name) => h[dateKey(year, m, d)] = name;
+  add(1, 1, '元日'); add(2, 11, '建国記念の日'); add(2, 23, '天皇誕生日');
+  add(4, 29, '昭和の日'); add(5, 3, '憲法記念日'); add(5, 4, 'みどりの日');
+  add(5, 5, 'こどもの日'); add(8, 11, '山の日'); add(11, 3, '文化の日');
+  add(11, 23, '勤労感謝の日');
+  add(1, nthWeekdayDay(year, 1, 1, 2), '成人の日');
+  add(7, nthWeekdayDay(year, 7, 1, 3), '海の日');
+  add(9, nthWeekdayDay(year, 9, 1, 3), '敬老の日');
+  add(10, nthWeekdayDay(year, 10, 1, 2), 'スポーツの日');
+  add(3, equinox(year, true), '春分の日');
+  add(9, equinox(year, false), '秋分の日');
+  const orig = Object.assign({}, h);
+  for (const key of Object.keys(orig)) {
+    const [y, m, d] = key.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    if (date.getDay() === 0) {
+      let next = new Date(date);
+      do { next.setDate(next.getDate() + 1); }
+      while (h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())]);
+      h[dateKey(next.getFullYear(), next.getMonth() + 1, next.getDate())] = '振替休日';
+    }
+  }
+  return h;
+}
+let holidayCache = {};
+function isHoliday(y, m, d) {
+  if (!holidayCache[y]) holidayCache[y] = getHolidays(y);
+  return holidayCache[y][dateKey(y, m, d)];
+}
+function isAdjustmentDay(y, m, d) {
+  if (ADJUSTMENT_MONTHS.includes(m)) return true;
+  const base = new Date(y, m - 1, d);
+  for (let off = -BUFFER_DAYS; off <= BUFFER_DAYS; off++) {
+    const c = new Date(base); c.setDate(c.getDate() + off);
+    if (ADJUSTMENT_MONTHS.includes(c.getMonth() + 1)) return true;
+  }
+  return false;
+}
+function getObonDays(year) {
+  const isCandidate = d => {
+    const wd = new Date(year, 7, d).getDay();
+    if (wd === 0 || wd === 6) return false;
+    if (isHoliday(year, 8, d)) return false;
+    return true;
+  };
+  const days = [];
+  for (let d = 13; d <= 16; d++) if (isCandidate(d)) days.push(d);
+  let cur = 12;
+  while (days.length < 4 && cur >= 1) {
+    if (isCandidate(cur)) days.unshift(cur);
+    cur--;
+  }
+  return days.sort((a, b) => a - b);
+}
+const obonCache = {};
+function isObon(y, m, d) {
+  if (m !== 8) return false;
+  if (!obonCache[y]) obonCache[y] = new Set(getObonDays(y));
+  return obonCache[y].has(d);
+}
+function isDefaultWork(y, m, d) {
+  const wd = new Date(y, m - 1, d).getDay();
+  if (isHoliday(y, m, d)) return false;
+  if (isObon(y, m, d)) return false;
+  return student.pattern.includes(wd);
+}
+function isWorkDay(y, m, d) {
+  const key = dateKey(y, m, d);
+  if (key in student.overrides) return student.overrides[key];
+  return isDefaultWork(y, m, d);
+}
+function iterateMonths(cb) {
+  for (let i = 0; i < 12; i++) {
+    let y = student.startYear, m = student.startMonth + i;
+    while (m > 12) { m -= 12; y++; }
+    cb(y, m, i);
+  }
+}
+
+function decodeStudent(str) {
+  try {
+    const json = decodeURIComponent(escape(atob(str)));
+    const c = JSON.parse(json);
+    return {
+      name: c.n || '',
+      program: c.p || 'master',
+      pattern: c.w || [1, 3, 5],
+      startYear: c.y || new Date().getFullYear(),
+      startMonth: c.m || 4,
+      overrides: c.o || {},
+    };
+  } catch(e) { return null; }
+}
+
+function renderInfo() {
+  document.getElementById('viewName').textContent = student.name || '(名前未設定)';
+  document.getElementById('viewProgram').textContent = PROGRAM_LABELS[student.program] || student.program;
+  document.getElementById('viewStart').textContent = `${student.startYear}年${student.startMonth}月開始`;
+  document.getElementById('viewPattern').textContent =
+    '週パターン: ' + student.pattern.map(d => WEEKDAY_LABELS[d]).join('・');
+  document.title = `${student.name || 'NIMSジュニア'} 勤務表`;
+}
+
+function renderCalendars() {
+  const target = TARGETS[student.program];
+  const container = document.getElementById('calendars');
+  container.innerHTML = '';
+
+  iterateMonths((y, m) => {
+    const monthDiv = document.createElement('div');
+    monthDiv.className = 'month';
+    const dim = daysInMonth(y, m);
+    let count = 0;
+    for (let d = 1; d <= dim; d++) if (isWorkDay(y, m, d)) count++;
+    const diff = Math.abs(count - target.monthly);
+    let cls = diff === 0 ? 'ok' : (diff <= 2 ? 'warn' : 'error');
+
+    const header = document.createElement('div');
+    header.className = 'month-header';
+    header.innerHTML = `<div class="month-name">${y}年 ${m}月</div>
+      <div class="month-count ${cls}">${count} / ${target.monthly}日</div>`;
+    monthDiv.appendChild(header);
+
+    const cal = document.createElement('div');
+    cal.className = 'calendar';
+    for (let wd = 0; wd < 7; wd++) {
+      const h = document.createElement('div');
+      h.className = 'cal-header';
+      if (wd === 0) h.classList.add('sun');
+      if (wd === 6) h.classList.add('sat');
+      h.textContent = WEEKDAY_LABELS[wd];
+      cal.appendChild(h);
+    }
+    const first = new Date(y, m - 1, 1);
+    for (let i = 0; i < first.getDay(); i++) {
+      const e = document.createElement('div'); e.className = 'day empty';
+      cal.appendChild(e);
+    }
+    for (let d = 1; d <= dim; d++) {
+      const date = new Date(y, m - 1, d);
+      const wd = date.getDay();
+      const holiday = isHoliday(y, m, d);
+      const adj = isAdjustmentDay(y, m, d);
+      const obon = isObon(y, m, d);
+      const work = isWorkDay(y, m, d);
+
+      const cell = document.createElement('div');
+      cell.className = 'day';
+      if (adj) cell.classList.add('adjustment');
+      if (obon) cell.classList.add('obon');
+      if (work) cell.classList.add('work');
+      if (holiday) cell.classList.add('holiday');
+      if (wd === 0) cell.classList.add('weekend-sun');
+      if (wd === 6) cell.classList.add('weekend-sat');
+
+      const num = document.createElement('div');
+      num.className = 'day-num'; num.textContent = d;
+      cell.appendChild(num);
+      const labelText = holiday || (obon ? '夏季休暇' : '');
+      if (labelText) {
+        const lbl = document.createElement('div');
+        lbl.className = 'day-label'; lbl.textContent = labelText;
+        cell.appendChild(lbl);
+      }
+      cell.title = `${dateKey(y, m, d)} (${WEEKDAY_LABELS[wd]})` +
+        (holiday ? ` - ${holiday}` : '') + (obon ? ' - 夏季休暇' : '') +
+        (adj ? ' [調整期間]' : '') + (work ? ' [勤務]' : '');
+      cal.appendChild(cell);
+    }
+    monthDiv.appendChild(cal);
+    container.appendChild(monthDiv);
+  });
+}
+
+function updateAnnualSummary() {
+  const target = TARGETS[student.program];
+  let count = 0;
+  iterateMonths((y, m) => {
+    const dim = daysInMonth(y, m);
+    for (let d = 1; d <= dim; d++) if (isWorkDay(y, m, d)) count++;
+  });
+  const el = document.getElementById('annualSummary');
+  const diff = count - target.annual;
+  const sign = diff > 0 ? '+' : '';
+  el.textContent = `年間 ${count}/${target.annual}日 (${sign}${diff})`;
+  el.className = 'summary';
+  if (diff === 0) el.classList.add('ok');
+  else if (Math.abs(diff) <= 3) el.classList.add('warn');
+  else el.classList.add('error');
+}
+
+function slugify(name) {
+  return (name || 'student').replace(/[\s\/\\<>:"|?*]+/g, '_').slice(0, 30);
+}
+
+function exportCSV() {
+  const rows = [['日付', '曜日', '勤務', '調整期間', '祝日/備考']];
+  iterateMonths((y, m) => {
+    const dim = daysInMonth(y, m);
+    for (let d = 1; d <= dim; d++) {
+      const wd = WEEKDAY_LABELS[new Date(y, m - 1, d).getDay()];
+      const work = isWorkDay(y, m, d);
+      const adj = isAdjustmentDay(y, m, d);
+      const note = isHoliday(y, m, d) || (isObon(y, m, d) ? '夏季休暇' : '');
+      rows.push([dateKey(y, m, d), wd, work ? '○' : '', adj ? '○' : '', note]);
+    }
+  });
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `nims_junior_${slugify(student.name)}_${student.startYear}-${pad(student.startMonth)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function init() {
+  document.getElementById('enLink').href = 'index_en.html' + location.hash;
+  const hash = location.hash;
+  if (!hash.startsWith('#s=')) {
+    document.getElementById('noData').style.display = 'block';
+    return;
+  }
+  student = decodeStudent(hash.slice(3));
+  if (!student) {
+    document.getElementById('noData').style.display = 'block';
+    document.getElementById('noData').innerHTML =
+      '<p>共有リンクが壊れているようです。事務局にお問い合わせください。</p>';
+    return;
+  }
+  document.getElementById('dataView').style.display = 'block';
+  renderInfo();
+  renderCalendars();
+  updateAnnualSummary();
+  document.getElementById('exportBtn').addEventListener('click', exportCSV);
+}
+init();
+</script>
+</body>
+</html>
