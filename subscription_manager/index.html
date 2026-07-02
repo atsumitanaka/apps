@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サブスクリプション管理システム</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    margin: 0; padding: 24px 16px; background: #f5f5f7; color: #1d1d1f;
+    font-size: 15px; line-height: 1.6;
+    max-width: 860px; margin-left: auto; margin-right: auto;
+  }
+  header { margin-bottom: 28px; }
+  h1 { font-size: 26px; margin: 0 0 6px 0; }
+  .subtitle { color: #666; font-size: 14px; }
+  .back { display: inline-block; margin-bottom: 12px; color: #007aff; text-decoration: none; font-size: 13px; }
+  .back:hover { text-decoration: underline; }
+
+  section {
+    background: white;
+    padding: 22px 26px;
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    margin-bottom: 16px;
+  }
+  section h2 {
+    font-size: 18px;
+    margin: 0 0 12px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e5e7;
+  }
+  section h3 { font-size: 15px; margin: 18px 0 8px 0; color: #333; }
+  p { margin: 0 0 12px 0; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: #e5f0ff;
+    color: #007aff;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .badge.admin { background: #ffefe5; color: #d97706; }
+
+  .steps { padding-left: 20px; margin: 0; }
+  .steps li { margin-bottom: 8px; }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .btn {
+    display: inline-block; padding: 8px 16px; border-radius: 6px;
+    text-decoration: none; font-size: 14px; font-weight: 600;
+    border: 1px solid #007aff;
+  }
+  .btn.primary { background: #007aff; color: white; }
+  .btn.primary:hover { background: #005ec4; }
+  .btn.secondary { background: white; color: #007aff; }
+  .btn.secondary:hover { background: #f0f7ff; }
+
+  .mockup {
+    background: white;
+    border: 1px solid #e5e5e7;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  .mockup-header {
+    background: #f5f5f7;
+    padding: 10px 14px;
+    border-bottom: 1px solid #e5e5e7;
+    font-size: 13px;
+    color: #555;
+  }
+  .mockup-header .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; margin-right: 4px; vertical-align: middle; }
+  .mockup-header .dot:nth-child(2) { background: #febc2e; }
+  .mockup-header .dot:nth-child(3) { background: #28c840; margin-right: 10px; }
+
+  table.list {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.list th, table.list td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  table.list th {
+    background: #fafafa;
+    color: #666;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  table.list td.amount { font-family: 'SF Mono', Menlo, monospace; }
+  table.list td.due { color: #d97706; font-weight: 600; }
+  table.list td.due.today { color: #ef4444; }
+
+  .callout {
+    background: #fff9e5;
+    border-left: 4px solid #f59e0b;
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-size: 13px;
+    margin: 12px 0;
+  }
+  .callout.info {
+    background: #e5f0ff;
+    border-left-color: #007aff;
+  }
+
+  .email-preview {
+    background: white;
+    border: 1px solid #e5e5e7;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+  .email-preview .subject {
+    font-weight: 600; margin-bottom: 8px;
+    padding-bottom: 8px; border-bottom: 1px solid #f0f0f0;
+  }
+  .email-preview .amount { color: #007aff; font-size: 17px; font-weight: 600; }
+
+  footer {
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e5e7;
+    color: #888;
+    font-size: 12px;
+    text-align: center;
+  }
+  footer a { color: #007aff; text-decoration: none; }
+
+  @media (max-width: 640px) {
+    section { padding: 18px 18px; }
+    table.list { font-size: 12px; }
+    table.list th, table.list td { padding: 8px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="back" href="../">← apps に戻る</a>
+
+<header>
+  <h1>サブスクリプション管理システム</h1>
+  <div class="subtitle">M365 (SharePoint + Power Automate) で契約サブスクを一元管理・請求日に自動通知</div>
+</header>
+
+<section>
+  <h2>このシステムの目的</h2>
+  <p>
+    チームで契約している各種サブスクリプション（Claude, Netflix, Adobe CC 等）を SharePoint リストで一元管理し、
+    <b>請求当日に契約時登録アドレスへ自動で通知メール</b>を送るシステムです。
+    クレジットカード明細を毎回確認しなくても、請求のタイミングと金額が把握できます。
+  </p>
+  <div class="callout info">
+    <b>ポイント</b>：導入したチーム内でしか見えません。SharePoint の権限機能で閲覧・編集を制御。<br>
+    <b>汎用性</b>：NIMS 固有設定なし。同じ手順で他機関にも展開可能。
+  </div>
+</section>
+
+<section>
+  <h2>実際の画面（イメージ）</h2>
+
+  <h3>SharePoint リスト</h3>
+  <div class="mockup">
+    <div class="mockup-header">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      📋 サブスクリプション — SharePoint
+    </div>
+    <table class="list">
+      <thead>
+        <tr>
+          <th>サービス名</th>
+          <th>月額</th>
+          <th>通貨</th>
+          <th>周期</th>
+          <th>次回請求日</th>
+          <th>契約者</th>
+          <th>カテゴリ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Claude Pro</td>
+          <td class="amount">20.00</td>
+          <td>USD</td>
+          <td>月次</td>
+          <td class="due today">2026-07-02（今日）</td>
+          <td>田中 篤史</td>
+          <td>AI</td>
+        </tr>
+        <tr>
+          <td>Netflix Standard</td>
+          <td class="amount">1,980</td>
+          <td>JPY</td>
+          <td>月次</td>
+          <td class="due">2026-07-15</td>
+          <td>山田 太郎</td>
+          <td>動画配信</td>
+        </tr>
+        <tr>
+          <td>Adobe Creative Cloud</td>
+          <td class="amount">6,480</td>
+          <td>JPY</td>
+          <td>月次</td>
+          <td class="due">2026-07-25</td>
+          <td>田中 篤史</td>
+          <td>業務ソフト</td>
+        </tr>
+        <tr>
+          <td>Microsoft 365 Family</td>
+          <td class="amount">18,400</td>
+          <td>JPY</td>
+          <td>年次</td>
+          <td>2027-03-10</td>
+          <td>佐藤 花子</td>
+          <td>業務ソフト</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>通知メール（イメージ）</h3>
+  <div class="email-preview">
+    <div class="subject">【本日請求】Claude Pro 20.00 USD</div>
+    <div><b>Claude Pro</b> の本日請求です。</div>
+    <div style="margin-top: 8px;">
+      請求額: <span class="amount">20.00 USD</span>（≈ ¥3,140）<br>
+      課金周期: 月次<br>
+      契約者: 田中 篤史<br>
+      次回請求: 2026-08-02
+    </div>
+    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; font-size: 12px; color: #666;">
+      💡 メモ: 個人契約、経費申請済み<br>
+      🔗 <a href="#" style="color: #007aff;">解約・設定ページを開く</a>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="badge">利用者</span>新しいサブスクを追加する</h2>
+  <ol class="steps">
+    <li>SharePoint サイト「サブスクリプション管理」を開く（<a href="#" style="color:#007aff;">管理者から共有されたリンク</a>）</li>
+    <li>右上の <b>「＋ 新規」</b> をクリック</li>
+    <li>フォームに入力：
+      <ul>
+        <li><b>サービス名</b>：Claude Pro など</li>
+        <li><b>月額 / 通貨</b>：課金額と通貨（JPY / USD / EUR）</li>
+        <li><b>課金周期</b>：月次 / 年次 / 四半期</li>
+        <li><b>次回請求日</b>：次に請求される日付</li>
+        <li><b>通知先メール</b>：契約時に登録しているアドレス</li>
+        <li><b>契約者</b>：自分を選択</li>
+        <li><b>解約URL</b>：サービスの解約/設定ページの URL（任意）</li>
+      </ul>
+    </li>
+    <li><b>「保存」</b> をクリック</li>
+  </ol>
+  <div class="callout">
+    翌朝 9:00 以降、次回請求日が今日と一致する日に自動でメールが届きます。
+    通知が来ない場合は <b>有効</b> が「はい」になっているか確認してください。
+  </div>
+</section>
+
+<section>
+  <h2><span class="badge">利用者</span>解約したとき</h2>
+  <p>
+    該当行を開き、<b>有効</b> を「いいえ」に変更して保存します。<br>
+    履歴として残るので、後から契約履歴の振り返りができます。完全に消したい場合のみ行を削除してください。
+  </p>
+</section>
+
+<section>
+  <h2><span class="badge admin">管理者</span>初回セットアップ</h2>
+  <p>
+    SharePoint サイトと Power Automate フロー2本を作成する必要があります。
+    詳細な手順書（Phase 1〜7、所要 約1.5〜2時間）を GitHub で公開しています：
+  </p>
+  <div class="btn-row">
+    <a href="https://github.com/atsumitanaka/apps/blob/main/subscription_manager/README.ja.md"
+       class="btn primary">セットアップ手順書を開く</a>
+    <a href="https://github.com/atsumitanaka/apps/tree/main/subscription_manager/templates"
+       class="btn secondary">テンプレート集</a>
+  </div>
+</section>
+
+<section>
+  <h2>技術スタック</h2>
+  <ul>
+    <li><b>データ層</b>：SharePoint Online リスト</li>
+    <li><b>フロー</b>：Power Automate（スケジュール トリガー × 2）</li>
+    <li><b>通知</b>：Outlook「メールの送信 (V2)」</li>
+    <li><b>為替</b>：exchangerate.host（週次で自動更新、Premium 不可の環境では手動更新）</li>
+  </ul>
+  <p>
+    外部サービス（Zapier, Airtable 等）を一切使わず、M365 のライセンス内で完結します。
+  </p>
+</section>
+
+<footer>
+  Source: <a href="https://github.com/atsumitanaka/apps/tree/main/subscription_manager">github.com/atsumitanaka/apps/subscription_manager</a>
+</footer>
+
+</body>
+</html>

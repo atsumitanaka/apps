@@ -1,0 +1,59 @@
+<!--
+  Power Automate「メールの送信 (V2)」の本文フィールドに貼り付けてください。
+  HTML モード（右上の <> アイコン）を有効にしてから貼ります。
+  @{items('Apply_to_each')?['...']} の部分は、Power Automate 側で
+  動的コンテンツピッカーから該当列を選択して置き換えるとエラーが起きにくいです。
+-->
+<div style="font-family: -apple-system, 'Segoe UI', 'Hiragino Sans', sans-serif; max-width: 560px; margin: 0 auto; color: #1d1d1f; line-height: 1.6;">
+
+  <div style="background: #007aff; color: white; padding: 16px 20px; border-radius: 8px 8px 0 0;">
+    <div style="font-size: 12px; opacity: 0.85;">SUBSCRIPTION BILLING NOTICE</div>
+    <div style="font-size: 20px; font-weight: 600; margin-top: 4px;">本日、@{items('Apply_to_each')?['Title']} の請求日です</div>
+  </div>
+
+  <div style="background: white; border: 1px solid #e5e5e7; border-top: none; border-radius: 0 0 8px 8px; padding: 20px;">
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+      <tr>
+        <td style="padding: 8px 0; color: #666; font-size: 13px; width: 30%;">サービス</td>
+        <td style="padding: 8px 0; font-weight: 600;">@{items('Apply_to_each')?['Title']}</td>
+      </tr>
+      <tr style="border-top: 1px solid #f0f0f0;">
+        <td style="padding: 8px 0; color: #666; font-size: 13px;">請求額</td>
+        <td style="padding: 8px 0; font-weight: 600; font-size: 18px; color: #007aff;">
+          @{items('Apply_to_each')?['Amount']} @{items('Apply_to_each')?['Currency']?['Value']}
+        </td>
+      </tr>
+      <tr style="border-top: 1px solid #f0f0f0;">
+        <td style="padding: 8px 0; color: #666; font-size: 13px;">課金周期</td>
+        <td style="padding: 8px 0;">@{items('Apply_to_each')?['BillingCycle']?['Value']}</td>
+      </tr>
+      <tr style="border-top: 1px solid #f0f0f0;">
+        <td style="padding: 8px 0; color: #666; font-size: 13px;">カテゴリ</td>
+        <td style="padding: 8px 0;">@{coalesce(items('Apply_to_each')?['Category']?['Value'], '未設定')}</td>
+      </tr>
+      <tr style="border-top: 1px solid #f0f0f0;">
+        <td style="padding: 8px 0; color: #666; font-size: 13px;">契約者</td>
+        <td style="padding: 8px 0;">@{items('Apply_to_each')?['Owner']?['DisplayName']}</td>
+      </tr>
+    </table>
+
+    <div style="background: #f5f5f7; padding: 12px 16px; border-radius: 6px; font-size: 13px; color: #555; margin-bottom: 16px;">
+      <div style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">メモ</div>
+      @{coalesce(items('Apply_to_each')?['Notes'], '(メモなし)')}
+    </div>
+
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="@{items('Apply_to_each')?['CancelUrl']}"
+         style="display: inline-block; padding: 10px 24px; background: white; color: #007aff; border: 1px solid #007aff; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px;">
+        解約・設定ページを開く
+      </a>
+    </div>
+
+    <div style="border-top: 1px solid #f0f0f0; padding-top: 12px; font-size: 11px; color: #999; text-align: center;">
+      このメールは SharePoint「サブスクリプション管理」リストからの自動通知です。<br>
+      不要な場合は該当行の <b>有効</b> を「いいえ」にすると停止します。
+    </div>
+
+  </div>
+</div>
