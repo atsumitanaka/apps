@@ -284,7 +284,9 @@ NextBillingDate eq '[🟣 formatDateTime(...)]' and Active eq 1
 
 - **「＋ アクションの追加」 (Add an action)** → 検索窓に `Outlook` と入力 → **「メールの送信 (V2)」 (Send an email (V2))**
 - 宛先 (To): 動的なコンテンツ (Dynamic content) から **NotifyEmail**
-- **「詳細オプションを表示」 (Show advanced options)** をクリック
+- CC を設定したい場合は、**アクションカードの最下部**にある **「詳細オプションを表示」 (Show advanced options)** をクリック（宛先のすぐ下ではなく、`本文` フィールドの**さらに下**にスクロールした位置）
+  - UI バージョンによっては `+ 新しいパラメーターの追加` (Add new parameter) というボタンや、既に全項目展開済みで見当たらない場合もある
+  - CC は任意なので、見つからなければ一旦スキップして OK
 - CC: 動的なコンテンツから **NotifyCc**
 - 件名 (Subject):
   ```
