@@ -547,52 +547,12 @@ SharePoint に**計算列**を追加：
 
 ---
 
-## 公開一覧ページ（GitHub Pages）
-
-チーム外にも「今どんなサブスクを契約しているか」を見せたい場合、`list.html` が SharePoint リストのミラーとして機能します。
-
-- **URL**: https://atsumitanaka.github.io/apps/subscription_manager/list.html
-- **データソース**: 同ディレクトリの `subscriptions.json`（GitHub Pages が静的に配信）
-- **できること**: 検索、カテゴリ/周期フィルタ、次回請求日ソート、月額(JPY 換算)合計、7日以内の請求ハイライト
-
-### `subscriptions.json` を SharePoint と同期する手順
-
-GitHub Pages は静的サイトなので SharePoint に直接繋がりません。以下の手順で **手動同期** します（週1回目安）。
-
-1. SharePoint の `Subscriptions` リストを開く
-2. コマンドバーの **「エクスポート」→「CSV にエクスポート」** をクリック
-3. ダウンロードした CSV をエディタ（VSCode 等）で開き、以下の形式で JSON に整形（列名は `subscriptions.json` の既存サンプルに合わせる）
-   ```json
-   {
-     "id": 1,
-     "service": "サービス名の値",
-     "amount": 20.00,
-     "currency": "USD",
-     "billingCycle": "月次",
-     "nextBillingDate": "2026-07-13",
-     "notifyEmail": "you@example.com",
-     "category": "AI",
-     "owner": "田中 篤史",
-     "cancelUrl": "https://...",
-     "notes": "",
-     "active": true
-   }
-   ```
-4. `subscriptions.json` の `lastUpdated` を今日の日付に更新、`fxRates` を最新レートに更新
-5. `subscriptions` 配列を丸ごと置き換え
-6. `note` フィールドは、実データに置き換えたら削除（残っているとページ上部に「サンプルデータ」の警告が出る）
-7. `git add subscriptions.json && git commit -m "sync subscriptions from SharePoint" && git push` で反映（数分後に公開）
-
-**Tip**: CSV→JSON の変換は ChatGPT/Claude に「この CSV を list.html の JSON 形式に変換して」と貼るのが最速です。
-
 ## ファイル構成
 
 ```
 apps/subscription_manager/
 ├── README.ja.md              # このファイル（管理者向けセットアップ手順）
 ├── index.html                # チーム向けランディング（GitHub Pages）
-├── list.html                 # 公開サブスク一覧ページ（GitHub Pages）
-├── subscriptions.json        # list.html のデータソース（SharePoint から手動同期）
 └── templates/
     ├── email_notification.html   # 通知メール本文（コピペ用）
     ├── sharepoint_schema.md      # リスト列定義（コピペ用の一覧）
