@@ -1,0 +1,123 @@
+{
+  "lastUpdated": "2026-07-13",
+  "note": "サンプルデータです。SharePoint リストの実データに置き換えてください（README.ja.md の『JSON エクスポート』を参照）。",
+  "fxRates": {
+    "USD": 157.0,
+    "EUR": 168.0,
+    "JPY": 1.0
+  },
+  "subscriptions": [
+    {
+      "id": 1,
+      "service": "Claude Pro",
+      "amount": 20.00,
+      "currency": "USD",
+      "billingCycle": "月次",
+      "nextBillingDate": "2026-07-13",
+      "notifyEmail": "you@example.com",
+      "category": "AI",
+      "owner": "田中 篤史",
+      "cancelUrl": "https://claude.ai/settings/billing",
+      "notes": "個人契約、経費申請済み",
+      "active": true
+    },
+    {
+      "id": 2,
+      "service": "Netflix Standard",
+      "amount": 1980,
+      "currency": "JPY",
+      "billingCycle": "月次",
+      "nextBillingDate": "2026-07-15",
+      "notifyEmail": "you@example.com",
+      "category": "動画配信",
+      "owner": "山田 太郎",
+      "cancelUrl": "https://www.netflix.com/YourAccount",
+      "notes": "",
+      "active": true
+    },
+    {
+      "id": 3,
+      "service": "Adobe Creative Cloud",
+      "amount": 6480,
+      "currency": "JPY",
+      "billingCycle": "月次",
+      "nextBillingDate": "2026-07-25",
+      "notifyEmail": "you@example.com",
+      "category": "業務ソフト",
+      "owner": "田中 篤史",
+      "cancelUrl": "https://account.adobe.com/plans",
+      "notes": "コンプリートプラン",
+      "active": true
+    },
+    {
+      "id": 4,
+      "service": "Microsoft 365 Family",
+      "amount": 18400,
+      "currency": "JPY",
+      "billingCycle": "年次",
+      "nextBillingDate": "2027-03-10",
+      "notifyEmail": "you@example.com",
+      "category": "業務ソフト",
+      "owner": "佐藤 花子",
+      "cancelUrl": "https://account.microsoft.com/services",
+      "notes": "6ユーザー分",
+      "active": true
+    },
+    {
+      "id": 5,
+      "service": "GitHub Copilot",
+      "amount": 10.00,
+      "currency": "USD",
+      "billingCycle": "月次",
+      "nextBillingDate": "2026-07-20",
+      "notifyEmail": "you@example.com",
+      "category": "業務ソフト",
+      "owner": "田中 篤史",
+      "cancelUrl": "https://github.com/settings/billing",
+      "notes": "",
+      "active": true
+    },
+    {
+      "id": 6,
+      "service": "ChatGPT Plus",
+      "amount": 20.00,
+      "currency": "USD",
+      "billingCycle": "月次",
+      "nextBillingDate": "2026-07-28",
+      "notifyEmail": "you@example.com",
+      "category": "AI",
+      "owner": "田中 篤史",
+      "cancelUrl": "https://chat.openai.com/#settings",
+      "notes": "",
+      "active": true
+    },
+    {
+      "id": 7,
+      "service": "Dropbox Plus",
+      "amount": 1500,
+      "currency": "JPY",
+      "billingCycle": "月次",
+      "nextBillingDate": "2026-08-02",
+      "notifyEmail": "you@example.com",
+      "category": "クラウド",
+      "owner": "山田 太郎",
+      "cancelUrl": "https://www.dropbox.com/account/billing",
+      "notes": "",
+      "active": true
+    },
+    {
+      "id": 8,
+      "service": "Spotify Premium",
+      "amount": 980,
+      "currency": "JPY",
+      "billingCycle": "月次",
+      "nextBillingDate": "2026-06-30",
+      "notifyEmail": "you@example.com",
+      "category": "その他",
+      "owner": "佐藤 花子",
+      "cancelUrl": "https://www.spotify.com/account/subscription/",
+      "notes": "解約済み",
+      "active": false
+    }
+  ]
+}
