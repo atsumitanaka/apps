@@ -9,6 +9,7 @@ M365（SharePoint リスト + Power Automate）でチームのサブスクリプ
 - **次回日付の自動繰り上げ**：通知送信後、課金周期に応じて次回請求日を自動更新（月次→+1ヶ月、年次→+1年、四半期→+3ヶ月）
 - **為替換算合計（オプション）**：週1回 USD/EUR レートを更新し、JPY 換算の月額合計を表示
 - **チーム共有**：SharePoint の権限機能で閲覧・編集を制御、Teams タブに埋め込み可能
+- **ダッシュボード HTML 自動配布（オプション）**：Power Automate が毎朝ダッシュボード HTML を再生成し共有フォルダに配置。チームメンバーは OneDrive 同期経由でダブルクリックだけで閲覧（SharePoint サインイン不要）
 
 ## 前提
 
@@ -27,8 +28,9 @@ M365（SharePoint リスト + Power Automate）でチームのサブスクリプ
 | 5 | 為替更新フロー作成（Flow 2） | 15分 | オプション |
 | 6 | テスト実行 | 10分 | 必須 |
 | 7 | チームメンバー招待 | 10分 | 必須 |
+| 8 | ダッシュボード HTML 自動生成（Flow 3） | 30分 | オプション |
 
-**最小構成（Phase 1, 2, 4, 6, 7）で 約1時間 20分**。JPY のサブスクしか無い or「月合計 JPY 換算」が要らない場合は Phase 3・5 を丸ごとスキップ可能。
+**最小構成（Phase 1, 2, 4, 6, 7）で 約1時間 20分**。JPY のサブスクしか無い or「月合計 JPY 換算」が要らない場合は Phase 3・5 を丸ごとスキップ可能。Phase 8 はチームメンバーが SharePoint 画面を経由せずダッシュボードを見たい場合の追加機能。
 
 ---
 
@@ -504,6 +506,146 @@ apps 側のランディングページを配布：
 
 ---
 
+## Phase 8: ダッシュボード HTML 自動生成（Flow 3、オプション）
+
+**目的**：チームメンバーが SharePoint リスト画面にサインインしなくても、共有フォルダ上のダブルクリックで開ける HTML ダッシュボードを配布する。データは Power Automate が定期的に SharePoint リストから再生成するので常に最新。
+
+**成果物イメージ**
+- 統計カード（有効件数、月額合計 JPY、今日の請求、7日以内）
+- 検索・カテゴリ/周期フィルタ・列ソート
+- 次回請求日の色分け（今日=赤、7日以内=橙）
+- 解約 URL への直リンク
+
+### 8-1. 準備
+
+1. **テンプレート HTML を取得**
+   - `templates/dashboard_template.html` をダウンロード（[GitHub 上のファイル](https://github.com/atsumitanaka/apps/blob/main/subscription_manager/templates/dashboard_template.html)）
+2. **出力先ライブラリの決定**
+   - チームで共有している SharePoint ドキュメントライブラリを選ぶ（`documents` 直下でも、`Subscription Dashboard` などの専用フォルダを作ってもよい）
+   - ここでは例として `documents/SubscriptionDashboard/` を使うとします
+3. **テンプレートをアップロード**
+   - 上記フォルダに `dashboard_template.html` をアップロード（Flow がここから読み込む）
+4. **出力ファイル名を決める**
+   - 例: `subscription_dashboard.html`（同じフォルダに Flow が上書き生成）
+
+### 8-2. Flow 3 作成
+
+Power Automate で **「一からスケジュール済みクラウド フロー (Scheduled cloud flow)」** を作成。名前: `Subscription Dashboard Generator`
+
+#### トリガー: Recurrence（繰り返し）
+
+- Interval: `1`、Frequency: `Day`
+- Advanced options → Time zone: `(UTC+09:00) Osaka, Sapporo, Tokyo`
+- At these hours: `8`、At these minutes: `0`
+- （毎朝 8:00 JST に更新）
+
+#### アクション 1: Get items — Subscriptions
+
+- Site Address: セットアップしたサイト
+- List Name: `Subscriptions`
+- **Filter Query**（オプション）: `Active eq 1`（無効行を出さないなら）
+- Top Count: `500`（想定件数より十分大きい値）
+
+#### アクション 2: Select（選択）
+
+- From: `value` （Get items の出力）
+- Map: **Text mode に切り替え** し（右上のトグル）、以下を貼り付け
+
+```json
+{
+  "id": @{item()?['ID']},
+  "service": "@{item()?['Title']}",
+  "amount": @{item()?['Amount']},
+  "currency": "@{item()?['Currency']?['Value']}",
+  "billingCycle": "@{item()?['BillingCycle']?['Value']}",
+  "nextBillingDate": "@{formatDateTime(item()?['NextBillingDate'], 'yyyy-MM-dd')}",
+  "category": "@{item()?['Category']?['Value']}",
+  "owner": "@{item()?['Owner']?['DisplayName']}",
+  "cancelUrl": "@{item()?['CancelUrl']?['Url']}",
+  "notes": "@{replace(coalesce(item()?['Notes'],''), '\"', '\\\"')}",
+  "active": @{if(equals(item()?['Active'], true), 'true', 'false')}
+}
+```
+
+> **注意**: `Notes` にダブルクォート `"` が含まれると JSON が壊れます。上記 `replace()` でエスケープしていますが、リッチテキスト設定の場合は HTML タグが混ざるので Notes を「プレーンテキスト」で作成しておくこと。
+> **プライバシー配慮**: `notifyEmail` はダッシュボードに出しません（テンプレート側でも表示されない）。チーム内で共有してよければ上記 Map に `"notifyEmail": "@{item()?['NotifyEmail']}"` を追加できます。
+
+#### アクション 3: Compose — Build data object
+
+Compose アクション名: `Build_data_object`
+
+Inputs（コード ビューで貼り付け）:
+
+```json
+{
+  "lastUpdated": "@{formatDateTime(convertTimeZone(utcNow(),'UTC','Tokyo Standard Time'),'yyyy-MM-dd HH:mm')} JST",
+  "fxRates": {
+    "USD": 157,
+    "EUR": 168,
+    "JPY": 1
+  },
+  "subscriptions": @{body('Select')}
+}
+```
+
+> **為替**: Flow 2（ExchangeRates 更新）を運用している場合は、事前に Get items で ExchangeRates を取得して各レートをここに埋め込むよう改造してください。運用していないなら上記の固定値でOK。
+
+#### アクション 4: Get file content — テンプレート読み込み
+
+- Site Address: 同じサイト
+- File Identifier: 8-1 でアップロードした `dashboard_template.html` をファイルピッカーで選択
+- Infer Content Type: **Yes**
+
+#### アクション 5: Compose — Render HTML
+
+Compose アクション名: `Render_HTML`
+
+Inputs（1行の式、コード ビューで貼り付け）:
+
+```
+@{replace(base64ToString(body('Get_file_content')?['$content']), '/*__INJECT__*/{"lastUpdated":"template","fxRates":{"USD":157,"EUR":168,"JPY":1},"subscriptions":[]}/*__END__*/', concat('/*__INJECT__*/', string(outputs('Build_data_object')), '/*__END__*/'))}
+```
+
+これで HTML 内のプレースホルダー1行を、生成した JSON 文字列で丸ごと置換します。
+
+#### アクション 6: Create file — ダッシュボード書き出し
+
+- Site Address: 同じサイト
+- Folder Path: `/SubscriptionDashboard`（8-1 で決めたパス）
+- File Name: `subscription_dashboard.html`
+- File Content: 動的コンテンツから **`Render_HTML` の Outputs** を選択
+
+> **注意**: 既に同名ファイルがある場合、Create file はエラーになるか自動的に `subscription_dashboard(1).html` を作ります。上書きしたい場合は **「ファイルのプロパティの更新」ではなく「ファイルの作成」を毎回削除＋作成する** か、**PATCH: `Send an HTTP request to SharePoint`** を使う必要あり。運用が安定するまでは、Create file の前に「ファイルの削除」を1個入れて既存を消してから作成する構成が楽です（初回は削除がエラーになるので「実行条件の構成」で失敗を許容）。
+
+### 8-3. テスト
+
+1. Flow を「テスト」→「手動」で実行
+2. 出力先フォルダに `subscription_dashboard.html` が生成されているか確認
+3. ダウンロードしてダブルクリック → ブラウザで開く
+4. リストの内容が反映されているか、次回請求日ソートで並んでいるか確認
+
+### 8-4. チームメンバーへの配布
+
+**推奨: OneDrive 同期**
+1. 出力先フォルダを開き **「同期 (Sync)」** をクリック
+2. 各メンバーが同じ手順で同期
+3. 各メンバーの Mac の `~/Library/CloudStorage/OneDrive-<テナント>/.../SubscriptionDashboard/` に `subscription_dashboard.html` が同期される
+4. ダブルクリックで開く → `file://` プロトコルで開くので M365 サインイン不要
+
+**代替: Teams のタブに追加**
+1. チーム チャネル → 「+」タブ追加 → 「Web サイト」
+2. URL に SharePoint のファイルビュー URL を貼る
+3. ただし Teams 経由だとサインイン画面が挟まる可能性あり
+
+### 8-5. トラブルシュート
+
+- **`Render_HTML` の出力に `/*__INJECT__*/{...}/*__END__*/` がそのまま残っている** → テンプレートの該当1行が改変されていないか確認。プレースホルダーは半角記号完全一致で置換
+- **ブラウザで開くと真っ白** → 開発者ツール (F12) のコンソールで `SyntaxError` が出ていれば JSON エスケープ失敗。Notes フィールドの `"` が原因のことが多い
+- **Get file content の後 `body('...')` が Base64 のまま** → `base64ToString(body('Get_file_content')?['$content'])` を使う（アクション 5 に既に含まれている）
+- **HTML 内の日本語カテゴリ (AI/動画配信 等) がずれる** → `Get items` の Currency/Category/BillingCycle 列は Choice 型なので `.Value` を必ず付ける
+
+---
+
 ## 運用のポイント
 
 ### 新規サブスク追加
@@ -556,7 +698,8 @@ apps/subscription_manager/
 └── templates/
     ├── email_notification.html   # 通知メール本文（コピペ用）
     ├── sharepoint_schema.md      # リスト列定義（コピペ用の一覧）
-    └── flow_expressions.md       # Power Automate 式集
+    ├── flow_expressions.md       # Power Automate 式集
+    └── dashboard_template.html   # Flow 3 が読み込むダッシュボード HTML テンプレート
 ```
 
 ## ライセンス / 情報
