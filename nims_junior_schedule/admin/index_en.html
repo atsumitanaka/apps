@@ -148,6 +148,37 @@
     main { grid-template-columns: 1fr; }
     .month { padding: 8px; }
   }
+  .help-btn {
+    padding: 3px 9px; border: 1px solid #007aff; background: white;
+    color: #007aff; border-radius: 5px; cursor: pointer; font-size: 12px;
+    font-family: inherit; vertical-align: middle; margin-left: 6px;
+  }
+  .help-btn:hover { background: #f0f7ff; }
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 1000;
+    align-items: flex-start; justify-content: center; padding-top: 40px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white; border-radius: 14px; padding: 22px 24px;
+    max-width: 560px; width: calc(100% - 32px); max-height: 80vh;
+    overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  .modal-box h2 { font-size: 15px; margin: 0 0 14px; }
+  .modal-box h3 { font-size: 13px; margin: 14px 0 5px; color: #007aff; font-weight: 700; }
+  .modal-box p, .modal-box li { font-size: 13px; line-height: 1.65; margin: 3px 0; }
+  .modal-box ul { padding-left: 18px; margin: 4px 0; }
+  .modal-box table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 6px; }
+  .modal-box td, .modal-box th { border: 1px solid #eee; padding: 4px 8px; text-align: left; }
+  .modal-box th { background: #f5f5f7; font-weight: 600; }
+  .modal-close {
+    display: block; margin: 18px auto 0;
+    padding: 7px 28px; background: #007aff; color: white;
+    border: none; border-radius: 8px; cursor: pointer; font-size: 13px;
+    font-family: inherit;
+  }
+  .modal-close:hover { background: #005ec4; }
 </style>
 </head>
 <body>
@@ -211,8 +242,63 @@
     <div class="legend-item"><div class="legend-swatch" style="background:white"></div>Off day</div>
     <div class="legend-item"><span style="color:#d70015;font-weight:700">!</span> 3-day/week rule violation</div>
   </div>
-  <div class="hint">Add a student, set name/email/calendar, then send via email or copy the share link. Click any day to toggle work/off.</div>
+  <div class="hint">Add a student, set name/email/calendar, then send via email or copy the share link. Click any day to toggle work/off.<button class="help-btn" id="helpBtn">? How to use</button></div>
 </header>
+
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-box">
+    <h2>NIMS Junior Work Schedule — How to Use</h2>
+
+    <h3>① Register a student</h3>
+    <ul>
+      <li>Click "<b>+ Add student</b>" to create a new student tab.</li>
+      <li>Enter the student's <b>Name</b> and <b>Email</b>, then set the <b>Program</b> (Master / Doctor), <b>Start month</b>, and <b>Weekly pattern</b> (select up to 3 work days).</li>
+      <li>You can manage multiple students at once and switch between them using the tabs.</li>
+    </ul>
+
+    <h3>② Adjust the calendar</h3>
+    <ul>
+      <li>Click any date to toggle between "Work day (blue)" and "Off day (white)".</li>
+      <li>Adjustment months (Feb, Mar, Aug, Sep) and 7 days before/after are shown in <span style="background:#fff8e1;padding:0 3px">light yellow</span> — the 3-day rule does not apply to these days.</li>
+      <li>Summer holiday (Obon) is automatically set and shown in <span style="background:#f3e5f5;padding:0 3px">light purple</span>.</li>
+      <li>A <b style="color:#d70015">!</b> mark means a 3-days-per-week rule violation — check the red-bordered week and adjust.</li>
+      <li>"<b>Reset edits</b>" removes all manual overrides (weekly pattern is not affected).</li>
+    </ul>
+
+    <h3>③ Share the schedule</h3>
+    <ul>
+      <li><b>Send email</b>: Opens your email client with the recipient, subject, and share URL pre-filled (you send it manually).</li>
+      <li><b>Copy link</b>: Copies the URL to your clipboard for pasting into chat etc.</li>
+      <li>The share URL contains the full schedule data. Students can open it on PC or smartphone to view the calendar and export CSV (read-only).</li>
+      <li>After updating a schedule, send the student a new link.</li>
+    </ul>
+
+    <h3>④ Color reference</h3>
+    <table>
+      <tr><th>Display</th><th>Meaning</th></tr>
+      <tr><td><span style="display:inline-block;width:14px;height:14px;background:#007aff;border-radius:3px;vertical-align:middle"></span> Blue</td><td>Work day</td></tr>
+      <tr><td><span style="display:inline-block;width:14px;height:14px;background:#fff8e1;border:1px solid #eee;border-radius:3px;vertical-align:middle"></span> Light yellow</td><td>Adjustment period (3-day rule exempt)</td></tr>
+      <tr><td><span style="display:inline-block;width:14px;height:14px;background:#f3e5f5;border:1px solid #eee;border-radius:3px;vertical-align:middle"></span> Light purple</td><td>Summer holiday / Obon (auto-set)</td></tr>
+      <tr><td><span style="display:inline-block;width:14px;height:14px;background:white;border:1px solid #eee;border-radius:3px;vertical-align:middle"></span> White</td><td>Off day</td></tr>
+      <tr><td><b style="color:#d70015">!</b></td><td>3-days/week rule violation</td></tr>
+    </table>
+    <ul style="margin-top:8px">
+      <li>Master: 11 days/month, 132 days/year &nbsp;|&nbsp; Doctor: 14 days/month, 168 days/year</li>
+      <li>Weeks containing public holidays or Obon days are exempt from violation checks</li>
+    </ul>
+
+    <h3>⑤ Data storage &amp; limits</h3>
+    <ul>
+      <li>All data is saved automatically in your browser's <b>localStorage</b> — nothing is sent to a server.</li>
+      <li>There is no hard limit on the number of students. The practical limit is your browser's storage capacity (typically 5–10 MB). Tens to over a hundred students can be stored without issue.</li>
+      <li>If you clear browser data or switch to a different PC, use "Copy link" to save each student's share URL as a backup.</li>
+      <li>"<b>Export CSV</b>" downloads the full-year work data as an Excel/Numbers-compatible file.</li>
+    </ul>
+
+    <button class="modal-close" id="helpClose">Close</button>
+  </div>
+</div>
+
 <main id="calendars"></main>
 
 <script>
@@ -691,6 +777,15 @@ function initEvents() {
   document.getElementById('copyLinkBtn').addEventListener('click', copyShareLink);
   document.getElementById('sendEmailBtn').addEventListener('click', sendEmail);
   document.getElementById('deleteBtn').addEventListener('click', deleteStudent);
+  document.getElementById('helpBtn').addEventListener('click', () => {
+    document.getElementById('helpModal').classList.add('open');
+  });
+  document.getElementById('helpClose').addEventListener('click', () => {
+    document.getElementById('helpModal').classList.remove('open');
+  });
+  document.getElementById('helpModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
 }
 
 loadState();

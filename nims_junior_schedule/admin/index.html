@@ -148,6 +148,37 @@
     main { grid-template-columns: 1fr; }
     .month { padding: 8px; }
   }
+  .help-btn {
+    padding: 3px 9px; border: 1px solid #007aff; background: white;
+    color: #007aff; border-radius: 5px; cursor: pointer; font-size: 12px;
+    font-family: inherit; vertical-align: middle; margin-left: 6px;
+  }
+  .help-btn:hover { background: #f0f7ff; }
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 1000;
+    align-items: flex-start; justify-content: center; padding-top: 40px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: white; border-radius: 14px; padding: 22px 24px;
+    max-width: 560px; width: calc(100% - 32px); max-height: 80vh;
+    overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  .modal-box h2 { font-size: 15px; margin: 0 0 14px; }
+  .modal-box h3 { font-size: 13px; margin: 14px 0 5px; color: #007aff; font-weight: 700; }
+  .modal-box p, .modal-box li { font-size: 13px; line-height: 1.65; margin: 3px 0; }
+  .modal-box ul { padding-left: 18px; margin: 4px 0; }
+  .modal-box table { border-collapse: collapse; width: 100%; font-size: 13px; margin-top: 6px; }
+  .modal-box td, .modal-box th { border: 1px solid #eee; padding: 4px 8px; text-align: left; }
+  .modal-box th { background: #f5f5f7; font-weight: 600; }
+  .modal-close {
+    display: block; margin: 18px auto 0;
+    padding: 7px 28px; background: #007aff; color: white;
+    border: none; border-radius: 8px; cursor: pointer; font-size: 13px;
+    font-family: inherit;
+  }
+  .modal-close:hover { background: #005ec4; }
 </style>
 </head>
 <body>
@@ -211,8 +242,62 @@
     <div class="legend-item"><div class="legend-swatch" style="background:white"></div>非勤務日</div>
     <div class="legend-item"><span style="color:#d70015;font-weight:700">!</span> 週3日ルール違反</div>
   </div>
-  <div class="hint">学生を追加して名前・メール・カレンダーを設定後、「メールで送信」または「リンクをコピー」で共有できます。日付クリックで勤務/非勤務を切替。</div>
+  <div class="hint">学生を追加して名前・メール・カレンダーを設定後、「メールで送信」または「リンクをコピー」で共有できます。日付クリックで勤務/非勤務を切替。<button class="help-btn" id="helpBtn">？ 詳しい使い方</button></div>
 </header>
+
+<div class="modal-overlay" id="helpModal">
+  <div class="modal-box">
+    <h2>NIMSジュニア勤務表 管理画面 — 使い方</h2>
+
+    <h3>① 学生を登録する</h3>
+    <ul>
+      <li>「<b>+ 学生を追加</b>」ボタンで学生タブを新規作成します。</li>
+      <li><b>名前</b>・<b>メール</b>を入力し、<b>プログラム</b>（Master / Doctor）・<b>開始年月</b>・<b>週パターン</b>（勤務曜日を最大3つ選択）を設定します。</li>
+      <li>複数の学生を同時に管理でき、タブをクリックして切り替えられます。</li>
+    </ul>
+
+    <h3>② カレンダーを調整する</h3>
+    <ul>
+      <li>日付をクリックするたびに「勤務日（青）↔ 非勤務日（白）」が切り替わります。</li>
+      <li>調整月（2・3・8・9月）とその前後7日間は<span style="background:#fff8e1;padding:0 3px">薄黄</span>で表示され、週3日ルールの対象外です。自由に設定できます。</li>
+      <li>夏季休暇（お盆）は<span style="background:#f3e5f5;padding:0 3px">薄紫</span>で自動設定されます。</li>
+      <li><b style="color:#d70015">！</b> が表示された日は週3日ルール違反 — 赤枠の週を確認して調整してください。</li>
+      <li>「<b>編集リセット</b>」で手動変更を全て元に戻せます（週パターンは変わりません）。</li>
+    </ul>
+
+    <h3>③ 勤務表を共有する</h3>
+    <ul>
+      <li><b>メールで送信</b>: メーラーが開き、宛先・件名・共有URLが自動入力されます（送信は手動）。</li>
+      <li><b>リンクをコピー</b>: URLをクリップボードにコピーします。チャット等で送付できます。</li>
+      <li>共有URLにはカレンダーデータが埋め込まれています。学生はPC/スマホで開くとカレンダーを閲覧・CSV出力できます（編集不可）。</li>
+      <li>勤務表を更新した場合は、新しいリンクを再送してください。</li>
+    </ul>
+
+    <h3>④ カラーと表示ルール</h3>
+    <table>
+      <tr><th>表示</th><th>意味</th></tr>
+      <tr><td><span style="display:inline-block;width:14px;height:14px;background:#007aff;border-radius:3px;vertical-align:middle"></span> 青</td><td>勤務日</td></tr>
+      <tr><td><span style="display:inline-block;width:14px;height:14px;background:#fff8e1;border:1px solid #eee;border-radius:3px;vertical-align:middle"></span> 薄黄</td><td>調整期間（週3日ルール対象外）</td></tr>
+      <tr><td><span style="display:inline-block;width:14px;height:14px;background:#f3e5f5;border:1px solid #eee;border-radius:3px;vertical-align:middle"></span> 薄紫</td><td>夏季休暇（お盆・自動設定）</td></tr>
+      <tr><td><span style="display:inline-block;width:14px;height:14px;background:white;border:1px solid #eee;border-radius:3px;vertical-align:middle"></span> 白</td><td>非勤務日</td></tr>
+      <tr><td><b style="color:#d70015">！</b></td><td>週3日ルール違反（要確認）</td></tr>
+    </table>
+    <ul style="margin-top:8px">
+      <li>Master: 月11日・年132日 / Doctor: 月14日・年168日</li>
+      <li>祝日・夏季休暇を含む7日窓は違反判定対象外です</li>
+    </ul>
+
+    <h3>⑤ データの保存・上限について</h3>
+    <ul>
+      <li>データはこのブラウザの <b>localStorage</b> に自動保存されます（サーバーへの送信なし）。</li>
+      <li>登録できる学生数に上限はありません。ただし、ブラウザのストレージ容量（通常5〜10 MB）が実質的な上限です。数十〜百人規模は問題なく使えます。</li>
+      <li>ブラウザのデータ消去・別PCへの移行時は、各学生の「リンクをコピー」で共有URLを退避してください。</li>
+      <li>「<b>CSV出力</b>」で年間勤務データを Excel/Numbers 用ファイルとしてダウンロードできます。</li>
+    </ul>
+
+    <button class="modal-close" id="helpClose">閉じる</button>
+  </div>
+</div>
 <main id="calendars"></main>
 
 <script>
@@ -704,6 +789,15 @@ function initEvents() {
   document.getElementById('copyLinkBtn').addEventListener('click', copyShareLink);
   document.getElementById('sendEmailBtn').addEventListener('click', sendEmail);
   document.getElementById('deleteBtn').addEventListener('click', deleteStudent);
+  document.getElementById('helpBtn').addEventListener('click', () => {
+    document.getElementById('helpModal').classList.add('open');
+  });
+  document.getElementById('helpClose').addEventListener('click', () => {
+    document.getElementById('helpModal').classList.remove('open');
+  });
+  document.getElementById('helpModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  });
 }
 
 loadState();
