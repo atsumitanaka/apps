@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ポリマー組成 BigSMILES 入力ツール</title>
+<style>
+/* ─── Reset ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ─── Base ─── */
+:root {
+  --blue-dark:   #1e3a5f;
+  --blue-mid:    #2563eb;
+  --blue-light:  #dbeafe;
+  --teal:        #0d9488;
+  --teal-light:  #ccfbf1;
+  --red:         #dc2626;
+  --red-light:   #fee2e2;
+  --gray-50:     #f9fafb;
+  --gray-100:    #f3f4f6;
+  --gray-200:    #e5e7eb;
+  --gray-400:    #9ca3af;
+  --gray-600:    #4b5563;
+  --gray-800:    #1f2937;
+  --radius:      8px;
+  --input-h:     36px;
+  --font:        'Hiragino Kaku Gothic Pro', 'Yu Gothic UI', Meiryo, sans-serif;
+  --mono:        'Courier New', Consolas, monospace;
+}
+body {
+  font-family: var(--font);
+  background: var(--gray-100);
+  color: var(--gray-800);
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ─── Header ─── */
+.app-header {
+  background: var(--blue-dark);
+  color: #fff;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 6px rgba(0,0,0,.35);
+}
+.app-header h1 { font-size: 15px; font-weight: 700; white-space: nowrap; }
+.app-header p  { font-size: 12px; color: #93c5fd; }
+.app-header code {
+  background: rgba(255,255,255,.12);
+  color: #fde68a;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: var(--mono);
+}
+
+/* ─── Layout ─── */
+.main { max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; }
+
+/* ─── Card ─── */
+.card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.07);
+}
+
+/* ─── Component header ─── */
+.comp-header {
+  background: var(--blue-dark);
+  color: #fff;
+  padding: 0 14px;
+  height: 46px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.comp-header .comp-num {
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  min-width: 90px;
+}
+.comp-header select {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 5px;
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.comp-header select option { color: #1f2937; background: #fff; }
+.comp-header select.select-polytype { flex: 1; min-width: 0; }
+.comp-header .btn-del {
+  height: 28px;
+  padding: 0 10px;
+  background: rgba(220,38,38,.75);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.comp-header .btn-del:hover { background: var(--red); }
+
+/* ─── Body ─── */
+.comp-body { padding: 16px; }
+
+/* ─── Section label ─── */
+.sec-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--gray-400);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--gray-200); }
+
+/* ─── Grid rows ─── */
+.grid {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.grid-3-1 { grid-template-columns: 3fr 1fr; }
+.grid-1-1-2 { grid-template-columns: 1fr 1fr 2fr; }
+.grid-1-1-1-2 { grid-template-columns: 1fr 1fr 1fr 2fr; }
+
+/* ─── Field ─── */
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--gray-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.field label .hint {
+  font-weight: 400;
+  color: var(--gray-400);
+  font-size: 10.5px;
+}
+.field input,
+.field select {
+  height: var(--input-h);
+  padding: 0 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--gray-800);
+  background: #fff;
+  width: 100%;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--blue-mid);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+.field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--gray-200);
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-family: var(--mono);
+  color: var(--gray-800);
+  background: #fff;
+  width: 100%;
+  height: 64px;
+  resize: vertical;
+  line-height: 1.5;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field textarea:focus {
+  outline: none;
+  border-color: var(--blue-mid);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+.field.smiles textarea {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #166534;
+  font-size: 12px;
+}
+.field.smiles textarea:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(13,148,136,.12);
+}
+.field-note {
+  font-size: 11px;
+  color: #b45309;
+  line-height: 1.4;
+  padding: 4px 8px;
+  background: #fffbeb;
+  border-left: 2px solid #fbbf24;
+  border-radius: 0 4px 4px 0;
+  margin-top: 2px;
+}
+
+/* ─── Element card ─── */
+.elem-card {
+  background: var(--blue-light);
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+.elem-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.elem-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--blue-mid);
+  background: #fff;
+  border: 1px solid #bfdbfe;
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+.elem-del {
+  height: 24px;
+  padding: 0 10px;
+  background: var(--red-light);
+  color: var(--red);
+  border: 1px solid #fca5a5;
+  border-radius: 5px;
+  font-size: 11px;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.elem-del:hover { background: var(--red); color: #fff; border-color: var(--red); }
+
+/* ─── Buttons ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: var(--font);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+  white-space: nowrap;
+}
+.btn:hover { opacity: .85; }
+.btn-primary { background: var(--blue-mid); color: #fff; }
+.btn-success { background: #059669; color: #fff; }
+.btn-outline {
+  background: #fff;
+  color: var(--blue-mid);
+  border: 1px solid var(--blue-mid);
+}
+.btn-sm {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 12px;
+  border-radius: 5px;
+}
+.btn-add-elem {
+  background: #fff;
+  color: var(--gray-600);
+  border: 1px dashed var(--gray-400);
+  width: 100%;
+  margin-top: 6px;
+  height: 32px;
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.btn-add-elem:hover { background: var(--gray-50); border-color: var(--blue-mid); color: var(--blue-mid); }
+
+/* ─── Bottom actions ─── */
+.actions {
+  display: flex;
+  gap: 10px;
+  margin: 6px 0 24px;
+}
+
+/* ─── Output ─── */
+.out-section { margin-top: 4px; }
+.out-card {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.out-header {
+  background: var(--gray-800);
+  color: #e5e7eb;
+  height: 38px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+.out-header .comp-label { font-weight: 700; color: #93c5fd; }
+.out-header .dropdown-info { color: var(--gray-400); font-size: 11.5px; }
+.btn-copy {
+  height: 26px;
+  padding: 0 12px;
+  background: rgba(255,255,255,.1);
+  color: #e5e7eb;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-family: var(--font);
+  cursor: pointer;
+}
+.btn-copy:hover { background: rgba(255,255,255,.2); }
+.btn-copy.done { background: #065f46; border-color: #065f46; color: #a7f3d0; }
+pre.json-pre {
+  padding: 14px 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--gray-800);
+  background: var(--gray-50);
+  overflow-x: auto;
+  border-top: 1px solid var(--gray-200);
+}
+.out-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--gray-400);
+  font-size: 13px;
+}
+@keyframes flash-update {
+  0%   { background: #fef9c3; border-color: #f59e0b; }
+  100% { background: #fff;    border-color: var(--gray-200); }
+}
+.field-flashed input, .field-flashed select {
+  animation: flash-update .8s ease-out forwards;
+}
+
+/* ─── Guide panel ─── */
+.guide-panel {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.guide-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-800);
+  text-align: left;
+}
+.guide-toggle:hover { background: var(--gray-50); }
+.guide-toggle .arrow { font-size: 11px; color: var(--gray-400); transition: transform .2s; }
+.guide-toggle.open .arrow { transform: rotate(180deg); }
+.guide-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--gray-200); }
+.guide-body.open { display: block; }
+.guide-section { margin-top: 14px; }
+.guide-section h4 { font-size: 11.5px; font-weight: 700; color: var(--gray-600); margin-bottom: 8px; }
+.guide-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.guide-table th {
+  background: var(--gray-100);
+  padding: 6px 10px;
+  text-align: left;
+  font-weight: 700;
+  color: var(--gray-600);
+  border-bottom: 1px solid var(--gray-200);
+}
+.guide-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: top;
+}
+.guide-table tr:last-child td { border-bottom: none; }
+.tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.tag-green  { background: #dcfce7; color: #166534; }
+.tag-blue   { background: #dbeafe; color: #1e40af; }
+.tag-orange { background: #ffedd5; color: #9a3412; }
+.tag-gray   { background: var(--gray-100); color: var(--gray-600); }
+.guide-note {
+  font-size: 11.5px;
+  color: var(--gray-600);
+  background: var(--gray-50);
+  border-left: 3px solid var(--blue-mid);
+  padding: 8px 12px;
+  margin-top: 12px;
+  line-height: 1.6;
+}
+.guide-note code {
+  font-family: var(--mono);
+  background: var(--gray-200);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 11px;
+}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>ポリマー組成 BigSMILES 入力ツール</h1>
+  <p>結合子: <code>[$]</code>（BigSMILES準拠）　|　Excelの free text 欄に貼るJSONを生成します</p>
+</header>
+
+<div class="main">
+
+  <!-- ガイド -->
+  <div class="guide-panel">
+    <button class="guide-toggle" onclick="toggleGuide(this)">
+      📋 ポリマー種別ガイド — element の数と記入方法
+      <span class="arrow">▼</span>
+    </button>
+    <div class="guide-body">
+      <div class="guide-section">
+        <h4>重合タイプ別の入力方法</h4>
+        <table class="guide-table">
+          <thead>
+            <tr>
+              <th>入力方法</th>
+              <th>重合タイプ</th>
+              <th>ポリマー（リスト内）</th>
+              <th>SMILESの方針</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-green">element × 2</span><br><small>2種のモノマーを交互連結</small></td>
+              <td>縮合重合<br>（線形）</td>
+              <td><b>PI</b>（ジアミン＋二無水物）<br><b>PBO</b>（ジアミン＋ジカルボン酸）<br><b>LCP</b>（ジオール/ヒドロキシ酸＋ジカルボン酸）<br><b>PU</b>（ジオール＋ジイソシアネート）</td>
+              <td>各モノマーの「ポリマー中での繰り返し単位」をelement #1・#2に入力。[$] = 隣のモノマーとの結合点</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">element × 1</span><br><small>1種の繰り返し単位</small></td>
+              <td>付加重合<br>（1成分）</td>
+              <td><b>PPE</b>, <b>PS</b>, <b>PB</b>, <b>PO</b>, <b>Fluoropolymer</b>, <b>Acrylic</b>, <b>Phenoxy resin</b></td>
+              <td>繰り返し単位のSMILES。[$] を両端に付ける</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-blue">element × 2</span><br><small>2種の繰り返し単位</small></td>
+              <td>共重合<br>（ラジカル等）</td>
+              <td><b>SMA</b>（スチレン＋無水マレイン酸）<br><b>PBE</b>（エチレン＋プロピレン）</td>
+              <td>各モノマーの繰り返し単位を element #1・#2に入力。weight ratioで比率を記入</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-orange">element × 1（モノマー）</span><br><small>反応前構造を記録</small></td>
+              <td>熱硬化性<br>（架橋ネットワーク）</td>
+              <td><b>BMI</b>, <b>CE</b>, <b>Epoxy</b>, <b>PBz</b></td>
+              <td>硬化後は3次元網目構造で1本のSMILESで表現不可。反応前モノマーSMILESを記録し、Polymerizable groupを明記</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="guide-note">
+        <b>[$] の意味：</b>隣の繰り返し単位・モノマーとの結合点。例えば PPE の <code>[$]Oc1c(C)cc([$])cc1C</code> は、左の[$]が前の単位のArと、右の[$]が次の単位のOと結合する。<br>
+        <b>縮合重合の連結イメージ：</b>PI の場合、ODA element の [$] と PMDA imide element の N-[$] がつながり、…–Ph–O–Ph–N(imide ring)–Ph–N(imide ring)–… という鎖を形成する。<br>
+        <b>⚠ マーク付きSMILS：</b>代表構造の例示。論文の具体的な化学構造を確認・修正してください。
+      </div>
+    </div>
+  </div>
+
+  <div id="componentsContainer"></div>
+
+  <div class="actions">
+    <button class="btn btn-outline" onclick="addComponent()">＋ component を追加</button>
+    <button class="btn btn-success" onclick="generateAll()">▶ JSON を生成</button>
+    <button class="btn" style="background:#fff;border:1px solid #dc2626;color:#dc2626;" onclick="clearAll()">✕ すべてクリア</button>
+  </div>
+
+  <div class="out-section">
+    <div class="sec-label" style="margin-bottom:12px;">生成されたJSON（Excelの free text 欄に貼り付け）</div>
+    <div id="outputContainer">
+      <div class="out-empty">「▶ JSON を生成」ボタンを押すと、ここに出力されます</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// ポリマー BigSMILES データベース
+// =============================================
+const POLYMER_DB = [
+  {
+    key: 'PPE', label: 'PPE|Poly(phenylene ether)',
+    displayName: 'poly(2,6-dimethyl-1,4-phenylene ether)', defaultClass: 'Homopolymer',
+    elements: [{ name: '2,6-dimethyl-1,4-phenylene ether', smiles: '[$]Oc1c(C)cc([$])cc1C', polyGroup: '', note: '' }]
+  },
+  {
+    key: 'BMI', label: 'BMI|Bismaleimide',
+    displayName: "4,4'-bismaleimidodiphenylmethane (MDA-BMI)", defaultClass: 'Homopolymer',
+    elements: [{ name: 'MDA-BMI（反応前モノマー構造）', smiles: 'O=C1C=CC(=O)N1c1ccc(Cc2ccc(N3C(=O)C=CC3=O)cc2)cc1', polyGroup: 'maleimide', note: '⚠ 反応前モノマー構造。反応後はマレイミド二重結合が開環した構造に修正してください' }]
+  },
+  {
+    key: 'CE', label: 'CE|Cyanate ester resin',
+    displayName: 'bisphenol A dicyanate (BADCy)', defaultClass: 'Homopolymer',
+    elements: [{ name: 'bisphenol A dicyanate（反応前モノマー構造）', smiles: 'N#COc1ccc(C(C)(C)c2ccc(OC#N)cc2)cc1', polyGroup: 'cyanate ester', note: '⚠ 反応前モノマー構造。反応後はシアネート基3つが三量体化してトリアジン環を形成' }]
+  },
+  {
+    key: 'Phenoxy', label: 'Phenoxy resin|high-molecular-weight BPA epoxy',
+    displayName: 'bisphenol A phenoxy resin', defaultClass: 'Homopolymer',
+    elements: [{ name: 'bisphenol A ether unit', smiles: '[$]CC(O)COc1ccc(C(C)(C)c2ccc(O[$])cc2)cc1', polyGroup: '', note: '高分子量BPAエポキシ（フェノキシ樹脂）の繰り返し単位。エポキシ環が開環した構造' }]
+  },
+  {
+    key: 'Epoxy', label: 'Epoxy',
+    displayName: 'diglycidyl ether of bisphenol A (DGEBA)', defaultClass: 'Homopolymer',
+    elements: [{ name: 'DGEBA（反応前モノマー構造）', smiles: 'C1OC1COc1ccc(C(C)(C)c2ccc(OCC3CO3)cc2)cc1', polyGroup: 'epoxy', note: '⚠ 反応前モノマー構造（DGEBA）。硬化剤の種類・配合によって反応後の構造が変わる' }]
+  },
+  {
+    key: 'PI', label: 'PI|Polyimide',
+    displayName: 'polyimide (PMDA-ODA)', defaultClass: 'Homopolymer',
+    elements: [
+      {
+        name: 'ODA (4,4\'-oxydianiline) unit',
+        smiles: '[$]c1ccc(Oc2ccc([$])cc2)cc1',
+        polyGroup: '',
+        note: 'ジアミン（ODA）のアリール部分。[$] = PMDA側のN-imideとの結合点。PMDA-ODA以外のPIは種類に合わせて修正してください'
+      },
+      {
+        name: 'PMDA (pyromellitic dianhydride) imide unit',
+        smiles: 'O=C1N([$])C(=O)c2cc3c(cc12)C(=O)N([$])C3=O',
+        polyGroup: '',
+        note: '二無水物（PMDA）のジイミド部分。[$] = ODA側のアリール炭素との結合点。⚠ 要確認'
+      }
+    ]
+  },
+  {
+    key: 'SMA', label: 'SMA|Styrene-maleic anhydride copolymer',
+    displayName: 'styrene-maleic anhydride copolymer', defaultClass: 'Copolymer',
+    elements: [
+      { name: 'styrene unit', smiles: '[$]CC(c1ccccc1)[$]', polyGroup: '', note: '' },
+      { name: 'maleic anhydride unit', smiles: '[$]C1C([$])C(=O)OC1=O', polyGroup: '', note: '無水マレイン酸の繰り返し単位（環は保持）' }
+    ]
+  },
+  {
+    key: 'PB', label: 'PB|Polybutadiene',
+    displayName: 'polybutadiene (1,4-)', defaultClass: 'Homopolymer',
+    elements: [{ name: '1,4-butadiene unit', smiles: '[$]CC=CC[$]', polyGroup: '', note: 'cis/trans混合を想定。純cis: [$]C/C=C\\C[$]、純trans: [$]C/C=C/C[$]' }]
+  },
+  {
+    key: 'PS', label: 'PS|Polystyrene',
+    displayName: 'polystyrene', defaultClass: 'Homopolymer',
+    elements: [{ name: 'styrene unit', smiles: '[$]CC(c1ccccc1)[$]', polyGroup: '', note: '' }]
+  },
+  {
+    key: 'BPVE', label: 'BPVE|Bis(trifluorovinyloxy)biphenyl vinyl ether',
+    displayName: "4,4'-bis(2-trifluorovinyloxy)biphenyl", defaultClass: 'Homopolymer',
+    elements: [{ name: 'BPVE（反応前モノマー構造）', smiles: 'FC(F)=C(F)Oc1ccc(-c2ccc(OC(F)=C(F)F)cc2)cc1', polyGroup: 'trifluorovinyl ether', note: '⚠ 反応前モノマー構造。反応後はパーフルオロシクロブタン環（[2+2]付加）を形成' }]
+  },
+  {
+    key: 'Acrylic', label: 'Acrylic polymer',
+    displayName: 'poly(methyl methacrylate) (PMMA)', defaultClass: 'Homopolymer',
+    elements: [{ name: 'methyl methacrylate unit', smiles: '[$]CC(C)(C(=O)OC)[$]', polyGroup: '', note: '⚠ PMMaを例示。アクリル系は種類が多い（PGMA等）。実際の化学構造を確認して修正してください' }]
+  },
+  {
+    key: 'PBz', label: 'PBz|Polybenzoxazine',
+    displayName: 'polybenzoxazine', defaultClass: 'Homopolymer',
+    elements: [{ name: '（ベンゾオキサジンの種類を確認して入力）', smiles: '', polyGroup: 'benzoxazine', note: '⚠ 開環重合後の構造はモノマー（フェノール・アミン・ホルムアルデヒドの組み合わせ）によって異なる' }]
+  },
+  {
+    key: 'PBE', label: 'PBE|Propylene-based elastomer',
+    displayName: 'ethylene-propylene rubber (EPR)', defaultClass: 'Copolymer',
+    elements: [
+      { name: 'ethylene unit', smiles: '[$]CC[$]', polyGroup: '', note: '' },
+      { name: 'propylene unit', smiles: '[$]CC(C)[$]', polyGroup: '', note: 'EPR（エチレン-プロピレンゴム）の例。比率は論文記載値で入力' }
+    ]
+  },
+  {
+    key: 'PBO', label: 'PBO|Poly(p-phenylene benzobisoxazole)',
+    displayName: 'poly(p-phenylene-2,6-benzobisoxazole)', defaultClass: 'Homopolymer',
+    elements: [{ name: 'p-phenylene benzobisoxazole unit', smiles: '[$]c1ccc2nc3ccc([$])cc3oc2c1', polyGroup: '', note: '⚠ 繰り返し単位（要確認）' }]
+  },
+  {
+    key: 'PU', label: 'PU|Polyurethane',
+    displayName: 'polyurethane (MDI-BDO)', defaultClass: 'Copolymer',
+    elements: [
+      {
+        name: 'BDO (1,4-butanediol) unit',
+        smiles: '[$]OCCCCO[$]',
+        polyGroup: '',
+        note: 'ジオール（BDO）のアルキレン部分。[$] = 隣のウレタンカルボニルCとの結合点。実際のジオールに合わせて修正してください'
+      },
+      {
+        name: 'MDI (4,4\'-methylenediphenyl diisocyanate) urethane unit',
+        smiles: '[$]NC(=O)c1ccc(Cc2ccc(C(=O)N[$])cc2)cc1',
+        polyGroup: '',
+        note: 'ジイソシアネート（MDI）のウレタン部分。[$] = ジオール側OとのO-CO-N結合点。⚠ 要確認'
+      }
+    ]
+  },
+  {
+    key: 'PO', label: 'PO|Polyolefin',
+    displayName: 'polyethylene (PE)', defaultClass: 'Homopolymer',
+    elements: [{ name: 'ethylene unit', smiles: '[$]CC[$]', polyGroup: '', note: 'PEを例示。PP: [$]CC(C)[$]、LLDPE等は種類によって修正してください' }]
+  },
+  {
+    key: 'Fluoropolymer', label: 'Fluoropolymer',
+    displayName: 'polytetrafluoroethylene (PTFE)', defaultClass: 'Homopolymer',
+    elements: [{ name: 'tetrafluoroethylene unit', smiles: '[$]C(F)(F)C(F)(F)[$]', polyGroup: '', note: 'PTFEを例示。FEP・PVDF等は種類によって修正してください' }]
+  },
+  {
+    key: 'LCP', label: 'LCP|Liquid-crystal polymer',
+    displayName: 'liquid-crystal polymer (Vectra A: HBA/HNA)', defaultClass: 'Copolymer',
+    elements: [
+      {
+        name: 'HBA (p-hydroxybenzoic acid) unit',
+        smiles: '[$]Oc1ccc(C(=O)[$])cc1',
+        polyGroup: '',
+        note: 'Vectra A（HBA:HNA=73:27）の例。[$] = 隣のエステル結合点'
+      },
+      {
+        name: 'HNA (6-hydroxy-2-naphthoic acid) unit',
+        smiles: '[$]Oc1ccc2cc(C(=O)[$])ccc2c1',
+        polyGroup: '',
+        note: '⚠ Xydarなど他のLCPは構造が大きく異なる。具体的な化学構造を確認して修正してください'
+      }
+    ]
+  },
+  { key: 'Other',       label: 'Other',       displayName: '', defaultClass: 'Homopolymer', elements: [{ name: '', smiles: '', polyGroup: '', note: '' }] },
+  { key: 'Crosslinker', label: 'Crosslinker', displayName: '', defaultClass: 'Homopolymer', elements: [{ name: '', smiles: '', polyGroup: '', note: '' }] }
+];
+
+// =============================================
+// State
+// =============================================
+let compCounter  = 0;
+let elemCounters = {};
+
+// =============================================
+// Component
+// =============================================
+function addComponent() {
+  compCounter++;
+  const id = compCounter;
+  elemCounters[id] = 0;
+
+  const opts = POLYMER_DB.map(p => `<option value="${p.key}">${esc(p.label)}</option>`).join('');
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = `comp-${id}`;
+  card.innerHTML = `
+    <div class="comp-header">
+      <span class="comp-num">component #${id}</span>
+      <select id="reactive-${id}">
+        <option value="Reactive">Reactive</option>
+        <option value="Inert">Inert</option>
+      </select>
+      <select id="polytype-${id}" class="select-polytype" onchange="onTypeChange(${id})">
+        <option value="">── ポリマー種別を選択 ──</option>
+        ${opts}
+      </select>
+      <button class="btn-del" onclick="removeComp(${id})">削除</button>
+    </div>
+    <div class="comp-body">
+      <div class="sec-label">コンポーネント情報（JSON出力項目）</div>
+
+      <div class="grid grid-3-1" style="margin-bottom:10px;">
+        <div class="field">
+          <label>name（ポリマー名）</label>
+          <input type="text" id="c-name-${id}" placeholder="例: 4,4'-bismaleimidodiphenylmethane">
+        </div>
+        <div class="field">
+          <label>MW <span class="hint">(g/mol)</span></label>
+          <input type="number" id="c-mw-${id}" placeholder="例: 50000">
+        </div>
+      </div>
+
+      <div class="grid grid-4">
+        <div class="field">
+          <label>weight ratio <span class="hint">（論文記載値）</span></label>
+          <input type="number" step="any" id="c-wr-${id}" placeholder="例: 20">
+        </div>
+        <div class="field">
+          <label>molar ratio <span class="hint">（論文記載値）</span></label>
+          <input type="number" step="any" id="c-mr-${id}" placeholder="例: 1">
+        </div>
+        <div class="field">
+          <label>commercial name</label>
+          <input type="text" id="c-com-${id}" placeholder="例: SA9000 (SABIC)">
+        </div>
+        <div class="field" id="cls-field-${id}">
+          <label>種類 <span class="hint" id="cls-hint-${id}">（ポリマー種別から自動設定）</span></label>
+          <select id="c-cls-${id}">
+            <option value="Homopolymer">Homopolymer</option>
+            <option value="Copolymer">Copolymer</option>
+            <option value="Block">Block</option>
+            <option value="Graft">Graft</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sec-label" style="margin-top:14px;">繰り返し単位（element）</div>
+      <div id="elems-${id}"></div>
+      <button class="btn-add-elem" onclick="addElem(${id})">＋ element を追加</button>
+    </div>
+  `;
+  document.getElementById('componentsContainer').appendChild(card);
+}
+
+function removeComp(id) {
+  document.getElementById(`comp-${id}`)?.remove();
+}
+
+function onTypeChange(id) {
+  const key = document.getElementById(`polytype-${id}`).value;
+  const p = POLYMER_DB.find(d => d.key === key);
+  if (!p) return;
+
+  document.getElementById(`elems-${id}`).innerHTML = '';
+  elemCounters[id] = 0;
+
+  const nameEl = document.getElementById(`c-name-${id}`);
+  if (!nameEl.value && p.displayName) nameEl.value = p.displayName;
+
+  const clsSel = document.getElementById(`c-cls-${id}`);
+  clsSel.value = p.defaultClass;
+
+  // 自動設定をフラッシュで知らせる
+  const clsField = document.getElementById(`cls-field-${id}`);
+  clsField.classList.remove('field-flashed');
+  void clsField.offsetWidth; // reflow
+  clsField.classList.add('field-flashed');
+
+  p.elements.forEach(el => addElem(id, el));
+}
+
+// =============================================
+// Element
+// =============================================
+function addElem(compId, data = {}) {
+  elemCounters[compId]++;
+  const n = elemCounters[compId];
+  const k = `${compId}-${n}`;
+
+  const noteHtml = data.note
+    ? `<div class="field-note">${esc(data.note)}</div>`
+    : '';
+
+  const div = document.createElement('div');
+  div.className = 'elem-card';
+  div.id = `elem-${k}`;
+  div.innerHTML = `
+    <div class="elem-header">
+      <span class="elem-badge">element #${n}</span>
+      <button class="elem-del" onclick="removeElem('${k}')">削除</button>
+    </div>
+
+    <div class="grid" style="grid-template-columns:1fr; margin-bottom:10px;">
+      <div class="field">
+        <label>element name（繰り返し単位の名称）</label>
+        <input type="text" id="e-name-${k}" value="${esc(data.name||'')}"
+          placeholder="例: 2,6-dimethyl-1,4-phenylene ether unit">
+      </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns:1fr; margin-bottom:10px;">
+      <div class="field smiles">
+        <label>smiles data　<span class="hint">[$] = 結合点（BigSMILES準拠）</span></label>
+        <textarea id="e-smi-${k}" placeholder="例: [$]Oc1c(C)cc([$])cc1C">${esc(data.smiles||'')}</textarea>
+        ${noteHtml}
+      </div>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="field">
+        <label>Polymerizable group <span class="hint">（なければ空欄）</span></label>
+        <input type="text" id="e-pg-${k}" value="${esc(data.polyGroup||'')}"
+          placeholder="例: maleimide">
+      </div>
+      <div class="field">
+        <label>MW <span class="hint">(g/mol)</span></label>
+        <input type="number" id="e-mw-${k}" placeholder="">
+      </div>
+      <div class="field">
+        <label>molecular volume <span class="hint">(cm³/mol)</span></label>
+        <input type="number" step="any" id="e-vol-${k}" placeholder="">
+      </div>
+    </div>
+
+    <div class="grid grid-4" style="margin-top:10px;">
+      <div class="field">
+        <label>weight ratio <span class="hint">（論文記載値）</span></label>
+        <input type="number" step="any" id="e-wr-${k}" placeholder="">
+      </div>
+      <div class="field">
+        <label>molar ratio <span class="hint">（論文記載値）</span></label>
+        <input type="number" step="any" id="e-mr-${k}" placeholder="">
+      </div>
+      <div class="field"></div>
+      <div class="field"></div>
+    </div>
+  `;
+  document.getElementById(`elems-${compId}`).appendChild(div);
+}
+
+function removeElem(k) {
+  document.getElementById(`elem-${k}`)?.remove();
+}
+
+// =============================================
+// JSON generation
+// =============================================
+function str(id) {
+  const v = document.getElementById(id)?.value?.trim();
+  return v || null;
+}
+function num(id) {
+  const v = document.getElementById(id)?.value?.trim();
+  if (!v) return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+function generateAll() {
+  const cards = Array.from(document.querySelectorAll('#componentsContainer .card'));
+  const out = document.getElementById('outputContainer');
+
+  if (!cards.length) {
+    out.innerHTML = '<div class="out-empty">コンポーネントを追加してください</div>';
+    return;
+  }
+
+  out.innerHTML = '';
+
+  cards.forEach((card, idx) => {
+    const id = parseInt(card.id.replace('comp-', ''));
+    const reactive = str(`reactive-${id}`) || 'Reactive';
+    const polytype  = str(`polytype-${id}`) || '';
+    const obj = {};
+
+    const name = str(`c-name-${id}`); if (name) obj['name'] = name;
+    const mw   = num(`c-mw-${id}`);   if (mw   != null) obj['MW(g/mol)'] = mw;
+    const wr   = num(`c-wr-${id}`);   if (wr   != null) obj['weight ratio'] = wr;
+    const mr   = num(`c-mr-${id}`);   if (mr   != null) obj['molar ratio'] = mr;
+    const com  = str(`c-com-${id}`);  if (com)  obj['commercial name'] = com;
+    const cls  = str(`c-cls-${id}`);  if (cls)  obj['Homopolymer/Copolymer/Block/Graft'] = cls;
+
+    Array.from(document.querySelectorAll(`#elems-${id} .elem-card`)).forEach((ec, ei) => {
+      const k = ec.id.replace('elem-', '');
+      const e = {};
+      const en  = str(`e-name-${k}`); if (en)       e['name'] = en;
+      const es  = str(`e-smi-${k}`);  if (es)       e['smiles data'] = es;
+      const epg = str(`e-pg-${k}`);   if (epg)      e['Polymerizable group'] = epg;
+      const emw = num(`e-mw-${k}`);   if (emw!=null) e['MW(g/mol)'] = emw;
+      const ev  = num(`e-vol-${k}`);  if (ev !=null) e['molecular volume(cm3/mol)'] = ev;
+      const ewr = num(`e-wr-${k}`);   if (ewr!=null) e['weight ratio'] = ewr;
+      const emr = num(`e-mr-${k}`);   if (emr!=null) e['molar ratio'] = emr;
+      if (Object.keys(e).length) obj[`element#${ei+1}`] = e;
+    });
+
+    const json = JSON.stringify(obj, null, 2);
+    const reactiveColor = reactive === 'Inert' ? '#6b7280' : '#059669';
+    const reactiveIcon  = reactive === 'Inert' ? '○' : '◎';
+
+    // BigSMILES連結文字列を生成
+    const elemSmilesList = Array.from(document.querySelectorAll(`#elems-${id} .elem-card`))
+      .map(ec => str(`e-smi-${ec.id.replace('elem-', '')}`))
+      .filter(s => s);
+    const bigsmiles = elemSmilesList.length > 0
+      ? `{[]${elemSmilesList.join(',')}[]}`
+      : null;
+
+    // element数とclsの整合性チェック
+    const elemCount = Object.keys(obj).filter(k => k.startsWith('element#')).length;
+    const clsValue  = obj['Homopolymer/Copolymer/Block/Graft'] || '';
+    const clsWarn   = (elemCount >= 2 && clsValue === 'Homopolymer')
+      ? `<div style="background:#fef3c7;border-left:3px solid #f59e0b;padding:7px 14px;font-size:11.5px;color:#92400e;">
+           ⚠ element が${elemCount}つありますが種類が「Homopolymer」のままです。Copolymer / Block / Graft のいずれかに変更してください。
+         </div>`
+      : '';
+
+    const bigsmilesHtml = bigsmiles ? `
+      <div style="border-top:1px solid #e5e7eb;">
+        <div style="background:#f0fdf4;padding:7px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <span style="font-size:11.5px;font-weight:700;color:#166534;">BigSMILES文字列（全element連結）</span>
+          <button class="btn-copy" id="cp-bs-${id}" onclick="doCopyText('cp-bs-${id}','bs-${id}')">文字列をコピー</button>
+        </div>
+        <pre class="json-pre" id="bs-${id}" style="background:#f0fdf4;color:#166534;border-top:1px solid #bbf7d0;">${esc(bigsmiles)}</pre>
+      </div>` : '';
+
+    const block = document.createElement('div');
+    block.className = 'out-card';
+    block.innerHTML = `
+      <div class="out-header">
+        <div>
+          <span class="comp-label">component #${idx+1}</span>
+          ${polytype ? `<span class="dropdown-info">　${esc(polytype)}</span>` : ''}
+        </div>
+        <button class="btn-copy" id="cp-${id}" onclick="doCopy(${id},this)">JSONをコピー</button>
+      </div>
+      <div style="background:#f8fafc;border-bottom:1px solid #e5e7eb;padding:8px 16px;display:flex;gap:24px;font-size:12px;flex-wrap:wrap;">
+        <div>
+          <span style="color:#9ca3af;font-weight:600;">Excelドロップダウン①</span>
+          <span style="margin-left:8px;font-weight:700;color:${reactiveColor};">${reactiveIcon} ${esc(reactive)}</span>
+        </div>
+        <div>
+          <span style="color:#9ca3af;font-weight:600;">Excelドロップダウン②</span>
+          <span style="margin-left:8px;font-weight:700;color:#1e40af;">${polytype ? esc(polytype) : '（未選択）'}</span>
+        </div>
+        <div style="margin-left:auto;color:#9ca3af;font-size:11px;">↓ このJSONをfree text列に貼る</div>
+      </div>
+      ${clsWarn}
+      <pre class="json-pre" id="json-${id}">${esc(json)}</pre>
+      ${bigsmilesHtml}
+    `;
+    out.appendChild(block);
+  });
+}
+
+function doCopy(id, btn) {
+  const text = document.getElementById(`json-${id}`)?.textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ コピー済み';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'JSONをコピー'; btn.classList.remove('done'); }, 2000);
+  });
+}
+
+function doCopyText(btnId, preId) {
+  const text = document.getElementById(preId)?.textContent;
+  const btn  = document.getElementById(btnId);
+  if (!text || !btn) return;
+  navigator.clipboard.writeText(text.trim()).then(() => {
+    btn.textContent = '✓ コピー済み';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = '文字列をコピー'; btn.classList.remove('done'); }, 2000);
+  });
+}
+
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toggleGuide(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+function clearAll() {
+  if (!confirm('入力内容とJSON出力をすべてクリアします。よろしいですか？')) return;
+  compCounter = 0;
+  elemCounters = {};
+  document.getElementById('componentsContainer').innerHTML = '';
+  document.getElementById('outputContainer').innerHTML =
+    '<div class="out-empty">「▶ JSON を生成」ボタンを押すと、ここに出力されます</div>';
+  addComponent();
+}
+
+// 初期表示
+addComponent();
+</script>
+</body>
+</html>
