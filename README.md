@@ -12,11 +12,19 @@
 **ファイル:** `polymer_smiles_tool.html`  
 **URL:** https://atsumitanaka.github.io/apps/polymer_smiles_tool.html
 
-ポリマーの繰り返し単位を BigSMILES 記法で記述し、データベース入力用 JSON を生成するツール。ポリマー種別（PPE・PI・SMA・BMI・CE・Epoxy など）を選択すると代表的な繰り返し単位の SMILES が自動入力される。結合子は `[$]`（BigSMILES 準拠）に統一。
+ポリマーの繰り返し単位を BigSMILES 記法で記述し、データベース入力用 JSON を生成するツール。結合子は `[$]`（BigSMILES 準拠）に統一。ブラウザ完結・サーバー不要。
 
+**主な機能**
+
+- ポリマー種別プリセット（PPE・PI・SMA・BMI・CE・Epoxy など）を選択すると代表 SMILES が自動入力
 - 複数 component・複数 element に対応
 - 全 element を連結した BigSMILES 文字列を同時出力
 - Reactive / Inert 分類、Homopolymer / Copolymer 等の種類を JSON に含む
+- **ポリマー名検索パネル** — 略称・正式名・製品名で横断検索し、ヒットした種別を component として追加
+  - 製品名エイリアスを内蔵（例: SA9000 → PPE/PPO、Ryton → PPS、Vectra → LCP、Kapton → PI）
+  - PPO・PPS・PMPS・PMPS-PPO など検索専用エントリも収録
+- **PubChem 検索**（element カード内）— 化合物名を入力して SMILES を自動取得
+- **構造確認ボタン** — 入力した SMILES の 2D 構造をブラウザ内で描画（SmilesDrawer 使用、初回のみ CDN 読み込み）
 
 ---
 
