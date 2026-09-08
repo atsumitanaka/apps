@@ -776,20 +776,24 @@ const POLYMER_DB = [
   {
     key: 'PPO', label: 'PPO|Poly(2,6-dimethyl-1,4-phenylene oxide)',
     displayName: 'poly(2,6-dimethyl-1,4-phenylene oxide)', defaultClass: 'Homopolymer',
+    dropdownHidden: true,
     elements: [{ name: '2,6-dimethyl-1,4-phenylene oxide unit', smiles: '[$]Oc1c(C)cc([$])cc1C', polyGroup: '', note: 'PPO = PPE（ポリフェニレンエーテル）と同一ポリマー。Noryl（SABIC）が代表品。ExcelドロップダウンではPPEとして登録されている場合あり' }]
   },
   {
     key: 'PPS', label: 'PPS|Poly(phenylene sulfide)',
     displayName: 'poly(p-phenylene sulfide)', defaultClass: 'Homopolymer',
+    dropdownHidden: true,
     elements: [{ name: 'p-phenylene sulfide unit', smiles: '[$]Sc1ccc([$])cc1', polyGroup: '', note: 'para位でS橋絡した芳香族スルフィド。メチル基なし。Ryton（Solvay）が代表品' }]
   },
   {
     key: 'PMPS', label: 'PMPS|Poly(2,6-dimethyl-1,4-phenylene sulfide)',
     displayName: 'poly(2,6-dimethyl-1,4-phenylene sulfide)', defaultClass: 'Homopolymer',
+    dropdownHidden: true,
     elements: [{ name: '2,6-dimethyl-1,4-phenylene sulfide unit', smiles: '[$]Sc1c(C)cc([$])cc1C', polyGroup: '', note: 'PPOのO→S置換体。2,6-ジメチルフェニレンスルフィド。アモルファス化により低Df・高周波特性に優れる' }]
   },
   {
     key: 'PMPS-PPO', label: 'PMPS-PPO|Alternating copolymer (PMPS/PPO)',
+    dropdownHidden: true,
     displayName: 'poly(2,6-dimethyl-1,4-phenylene sulfide-alt-2,6-dimethyl-1,4-phenylene oxide)',
     defaultClass: 'Copolymer',
     elements: [
@@ -945,7 +949,7 @@ function addComponent() {
   const id = compCounter;
   elemCounters[id] = 0;
 
-  const opts = POLYMER_DB.map(p => `<option value="${p.key}">${esc(p.label)}</option>`).join('');
+  const opts = POLYMER_DB.filter(p => !p.dropdownHidden).map(p => `<option value="${p.key}">${esc(p.label)}</option>`).join('');
 
   const card = document.createElement('div');
   card.className = 'card';
@@ -1312,7 +1316,21 @@ function addComponentFromSearch(key) {
   const last  = cards[cards.length - 1];
   const id    = parseInt(last.id.replace('comp-', ''));
   const sel   = document.getElementById(`polytype-${id}`);
-  if (sel) { sel.value = key; onTypeChange(id); }
+
+  if (sel) {
+    // dropdownHiddenのエントリは選択肢にないので、動的にoptionを追加してからonTypeChange
+    if (!Array.from(sel.options).some(o => o.value === key)) {
+      const p = POLYMER_DB.find(d => d.key === key);
+      if (p) {
+        const opt = document.createElement('option');
+        opt.value = p.key;
+        opt.textContent = p.label;
+        sel.appendChild(opt);
+      }
+    }
+    sel.value = key;
+    onTypeChange(id);
+  }
   last.scrollIntoView({ behavior: 'smooth', block: 'start' });
   clearPolymerSearch();
 }
