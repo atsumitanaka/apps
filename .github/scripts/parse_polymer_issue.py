@@ -77,6 +77,7 @@ def main() -> int:
     dropdown_hidden_text = find_by_label(sections, "dropdown")
     aliases_text = find_by_label(sections, "aliases")
     elements_text = find_by_label(sections, "elements")
+    monomers_text = find_by_label(sections, "monomers")
 
     if not key or key.startswith("_No response_"):
         print("::error::key is required", file=sys.stderr)
@@ -115,6 +116,21 @@ def main() -> int:
         el.setdefault("polyGroup", "")
         el.setdefault("note", "")
 
+    monomers: list = []
+    if monomers_text and not monomers_text.startswith("_No response_"):
+        try:
+            parsed = json.loads(strip_code_fence(monomers_text))
+            if isinstance(parsed, list):
+                for m in parsed:
+                    if not isinstance(m, dict):
+                        continue
+                    m.setdefault("name", "")
+                    m.setdefault("smiles", "")
+                    m.setdefault("role", "")
+                    monomers.append(m)
+        except json.JSONDecodeError as e:
+            print(f"::warning::monomers JSON parse skipped: {e}", file=sys.stderr)
+
     new_entry: dict = {
         "key": key,
         "label": label,
@@ -123,6 +139,8 @@ def main() -> int:
         "aliases": aliases,
         "elements": elements,
     }
+    if monomers:
+        new_entry["monomers"] = monomers
     if parse_bool_checkbox(dropdown_hidden_text):
         new_entry["dropdownHidden"] = True
 

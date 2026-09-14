@@ -84,6 +84,17 @@ body:
       required: true
 
   - type: textarea
+    id: monomers
+    attributes:
+      label: monomers（構成モノマー - JSON配列、任意）
+      description: |
+        このポリマーを構成する原料モノマー（化合物SMILES）。空欄可。
+        フィールド - name / smiles / role
+      value: |
+        []
+      render: json
+
+  - type: textarea
     id: references
     attributes:
       label: 参考文献 / 出典（任意）
