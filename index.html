@@ -93,12 +93,13 @@
     <div class="card-body">
       <h2><a href="https://atsumitanaka.github.io/apps/polymer_smiles_tool/">ポリマー組成 BigSMILES 入力ツール</a></h2>
       <div class="desc">
-        ポリマーの繰り返し単位を BigSMILES 記法で記述し、データベース入力用 JSON を生成するツール。PPE・PI・SMA・BMI・CE・Epoxy など主要ポリマー種別を選択すると代表的な繰り返し単位の SMILES が自動入力される。全 element を連結した BigSMILES 文字列も同時出力。結合子は <code>[$]</code>（BigSMILES 準拠）に統一。
+        ポリマー組成を BigSMILES 記法で入力し、データベース登録用 JSON を生成するツール。主要 26 種のプリセット、略称・商品名検索（Noryl・Kapton 等）に加え、構造式画像を検索窓にドロップすると Gemini Vision で SMILES を自動抽出。PubChem 連携で化合物名 ⇄ SMILES 相互変換、Gemini によるモノマー逆推定、SmilesDrawer での構造プレビューに対応。Issue Form 経由で GitHub 上の共有 DB に新規ポリマー・モノマーを追加でき、PR レビューを経て全ユーザーに反映される。結合子は <code>[$]</code>（BigSMILES 準拠）。
       </div>
       <div class="links">
         <a href="https://atsumitanaka.github.io/apps/polymer_smiles_tool/" class="btn primary">開く</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/polymer_smiles_tool/README.md" class="btn secondary">README</a>
       </div>
-      <div class="meta">ポリマー種別プリセット / BigSMILES 文字列出力 / JSON 生成・コピー / 複数 component 対応 / ブラウザ完結</div>
+      <div class="meta">26 種プリセット / 略称・商品名検索 / 画像→SMILES 認識 (Gemini) / モノマー逆推定 / PubChem 連携 / 構造描画 / Issue Form で共有 DB 追加</div>
     </div>
   </div>
 
