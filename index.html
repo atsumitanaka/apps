@@ -21,7 +21,14 @@
     background: #f5f5f7; color: #333; font-size: 12px; border: 1px solid #d1d1d6;
   }
   .lang-btn.active { background: #007aff; color: white; border-color: #007aff; }
-  main { display: flex; flex-direction: column; gap: 14px; }
+  main { display: flex; flex-direction: column; gap: 28px; }
+  section { display: flex; flex-direction: column; gap: 14px; }
+  .section-title {
+    font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+    color: #6e6e73; text-transform: uppercase;
+    margin: 0 0 2px 4px;
+    padding-bottom: 6px; border-bottom: 1px solid #e5e5e7;
+  }
   .card {
     background: white; padding: 18px 20px; border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
@@ -44,6 +51,16 @@
     transition: transform 0.25s ease;
   }
   .card-thumb:hover img { transform: scale(1.03); }
+  .card-thumb.userscript {
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #2a2a2e 0%, #1d1d1f 100%);
+    color: #a4dc5b; text-decoration: none;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    text-align: center;
+  }
+  .card-thumb.userscript .us-ext { font-size: 28px; font-weight: 700; letter-spacing: 0.02em; }
+  .card-thumb.userscript .us-sub { font-size: 11px; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.15em; margin-top: 8px; }
+  .card-thumb.userscript:hover .us-ext { color: #b8e878; }
   .card-body { flex: 1; min-width: 0; }
   .card h2 { font-size: 17px; margin: 0 0 6px 0; }
   .card h2 a { color: #1d1d1f; text-decoration: none; }
@@ -86,6 +103,9 @@
 
 <main>
 
+<section>
+  <h2 class="section-title">Research Support</h2>
+
   <div class="card">
     <a class="card-thumb" href="https://atsumitanaka.github.io/apps/polymer_smiles_tool/">
       <img src="screenshots/polymer_smiles_tool.png" alt="ポリマー BigSMILES 入力ツールの画面" loading="lazy">
@@ -104,22 +124,49 @@
   </div>
 
   <div class="card">
-    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/">
-      <img src="screenshots/nims_junior.png" alt="NIMSジュニア勤務表のカレンダー画面" loading="lazy">
+    <a class="card-thumb userscript" href="https://atsumitanaka.github.io/apps/starrydata_userscripts/starrydata_oa_filter.user.js">
+      <div>
+        <div class="us-ext">.user.js</div>
+        <div class="us-sub">Tampermonkey</div>
+      </div>
     </a>
     <div class="card-body">
-      <h2><a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/">NIMSジュニア勤務表ジェネレータ</a></h2>
+      <h2><a href="https://atsumitanaka.github.io/apps/starrydata_userscripts/starrydata_oa_filter.user.js">Starrydata2 Open Access Filter</a></h2>
       <div class="desc">
-        NIMSジュニア研究員（Master 年132日 / Doctor 年168日）の年間勤務日をカレンダーで組み立て、学生にURL共有・メール送信で配布する管理ツール。事務職員向け。週固定パターン + 調整月の自由設定 + 祝日・お盆の自動反映で、規定を満たすスケジュールを短時間で作成できます。
+        Starrydata2 の paperlist ページに OA バッジ・ライセンス表示を追加するユーザースクリプト。Unpaywall API で全論文を判定し、CC BY / CC0 のみ絞り込み、CSV エクスポート、Editor（キュレーター）名でのオンデマンド検索に対応。結果は IndexedDB に 30 日キャッシュされ、30k 件規模のプロジェクトでも動作。Tampermonkey 拡張がインストール済みの Chrome / Edge / Firefox で「開く」を押すと自動でインストール画面が開きます。
       </div>
       <div class="links">
-        <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/" class="btn primary">管理画面を開く</a>
-        <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/" class="btn secondary">学生ビュー（要リンク）</a>
-        <a href="https://github.com/atsumitanaka/apps/blob/main/nims_junior_schedule/README.ja.md" class="btn secondary">README</a>
+        <a href="https://atsumitanaka.github.io/apps/starrydata_userscripts/starrydata_oa_filter.user.js" class="btn primary">インストール</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/starrydata_userscripts/starrydata_oa_filter.user.js" class="btn secondary">ソースを見る</a>
       </div>
-      <div class="meta">複数学生タブ管理 / 週固定パターン + 調整月 / 祝日・お盆自動反映 / CSV出力 / JP・EN対応</div>
+      <div class="meta">Tampermonkey / paperlist ページ / Unpaywall 連携 / CC BY・CC0 フィルタ / CSV出力 / Editor 検索 / IndexedDB キャッシュ (30k件)</div>
     </div>
   </div>
+
+  <div class="card">
+    <a class="card-thumb userscript" href="https://atsumitanaka.github.io/apps/starrydata_userscripts/starrydata_summary_resize.user.js">
+      <div>
+        <div class="us-ext">.user.js</div>
+        <div class="us-sub">Tampermonkey</div>
+      </div>
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/starrydata_userscripts/starrydata_summary_resize.user.js">Starrydata2 Summary Chart Resize</a></h2>
+      <div class="desc">
+        Starrydata2 の summary（report）ページの Chart.js グラフをウィンドウ幅に追従させ、カラム数（auto / 1〜6）とデータ点サイズ（0〜12px）をページ上の UI から切り替えられるようにするユーザースクリプト。設定は localStorage に保存され、次回以降も維持されます。
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/starrydata_userscripts/starrydata_summary_resize.user.js" class="btn primary">インストール</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/starrydata_userscripts/starrydata_summary_resize.user.js" class="btn secondary">ソースを見る</a>
+      </div>
+      <div class="meta">Tampermonkey / report ページ / ウィンドウ幅追従 / カラム数切替 / データ点サイズ変更 / 設定保存</div>
+    </div>
+  </div>
+
+</section>
+
+<section>
+  <h2 class="section-title">Office Support</h2>
 
   <div class="card">
     <a class="card-thumb" href="https://atsumitanaka.github.io/nims-scholarship-finder/">
@@ -135,6 +182,42 @@
         <a href="https://github.com/atsumitanaka/nims-scholarship-finder" class="btn secondary">GitHub</a>
       </div>
       <div class="meta">条件検索 / 締切近い順 / スケジュール比較 / PDF自動抽出（Gemini） / JP・EN対応</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/exam_schedule/">
+      <img src="screenshots/exam_schedule.png" alt="受験スケジュール表と自己判定チェック" loading="lazy">
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/exam_schedule/">受験スケジュール（筑波大 IMI × NIMSジュニア）</a></h2>
+      <div class="desc">
+        2027年4月入学に向けた出願要件・スケジュール一覧。筑波大 国際マテリアルズイノベーション学位 (10月実施) と NIMSジュニア (7月公募) の併願用。出願資格の自己判定、必要書類、締切カウントダウンをまとめて確認できます。
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/exam_schedule/" class="btn primary">開く (JA)</a>
+        <a href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html" class="btn secondary">Open (EN)</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/exam_schedule/README.ja.md" class="btn secondary">README</a>
+      </div>
+      <div class="meta">出願資格チェック / 締切カウントダウン / 提出書類一覧 / JP・EN対応</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/">
+      <img src="screenshots/nims_junior.png" alt="NIMSジュニア勤務表のカレンダー画面" loading="lazy">
+    </a>
+    <div class="card-body">
+      <h2><a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/">NIMSジュニア勤務表ジェネレータ</a></h2>
+      <div class="desc">
+        NIMSジュニア研究員（Master 年132日 / Doctor 年168日）の年間勤務日をカレンダーで組み立て、学生にURL共有・メール送信で配布する管理ツール。事務職員向け。週固定パターン + 調整月の自由設定 + 祝日・お盆の自動反映で、規定を満たすスケジュールを短時間で作成できます。
+      </div>
+      <div class="links">
+        <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/admin/" class="btn primary">管理画面を開く</a>
+        <a href="https://atsumitanaka.github.io/apps/nims_junior_schedule/" class="btn secondary">学生ビュー（要リンク）</a>
+        <a href="https://github.com/atsumitanaka/apps/blob/main/nims_junior_schedule/README.ja.md" class="btn secondary">README</a>
+      </div>
+      <div class="meta">複数学生タブ管理 / 週固定パターン + 調整月 / 祝日・お盆自動反映 / CSV出力 / JP・EN対応</div>
     </div>
   </div>
 
@@ -171,23 +254,7 @@
     </div>
   </div>
 
-  <div class="card">
-    <a class="card-thumb" href="https://atsumitanaka.github.io/apps/exam_schedule/">
-      <img src="screenshots/exam_schedule.png" alt="受験スケジュール表と自己判定チェック" loading="lazy">
-    </a>
-    <div class="card-body">
-      <h2><a href="https://atsumitanaka.github.io/apps/exam_schedule/">受験スケジュール（筑波大 IMI × NIMSジュニア）</a></h2>
-      <div class="desc">
-        2027年4月入学に向けた出願要件・スケジュール一覧。筑波大 国際マテリアルズイノベーション学位 (10月実施) と NIMSジュニア (7月公募) の併願用。出願資格の自己判定、必要書類、締切カウントダウンをまとめて確認できます。
-      </div>
-      <div class="links">
-        <a href="https://atsumitanaka.github.io/apps/exam_schedule/" class="btn primary">開く (JA)</a>
-        <a href="https://atsumitanaka.github.io/apps/exam_schedule/index_en.html" class="btn secondary">Open (EN)</a>
-        <a href="https://github.com/atsumitanaka/apps/blob/main/exam_schedule/README.ja.md" class="btn secondary">README</a>
-      </div>
-      <div class="meta">出願資格チェック / 締切カウントダウン / 提出書類一覧 / JP・EN対応</div>
-    </div>
-  </div>
+</section>
 
 </main>
 
